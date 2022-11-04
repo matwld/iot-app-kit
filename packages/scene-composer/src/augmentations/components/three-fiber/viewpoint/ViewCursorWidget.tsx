@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
-import { Mesh as THREEMesh, Object3D as THREEObject3D, Vector3 as THREEVector3 } from 'three';
+import { Mesh as THREEMesh, Object3D as THREEObject3D, Vector3 as THREEVector3, Box3 } from 'three';
 import { SVGLoader } from 'three-stdlib';
 
 import { convertSvgToMesh, getDataUri } from '../../../../utils/svgUtils';
@@ -8,10 +8,12 @@ import { getIntersectionTransform } from '../../../../utils/raycastUtils';
 import { sceneComposerIdContext } from '../../../../common/sceneComposerIdContext';
 import { useEditorState } from '../../../../store';
 import { ViewCursorEditSvgString, ViewCursorMoveSvgString } from '../../../../assets/svgs';
+import { ROOT_OBJECT_3D_NAME } from '../../../../common/constants';
+import { getSafeBoundingBox } from '../../../../utils/objectThreeUtils';
 
 export const ViewCursorWidget = () => {
   const ref = useRef<THREEObject3D>(null);
-  const { gl } = useThree();
+  const { gl, scene } = useThree();
   const sceneComposerId = useContext(sceneComposerIdContext);
   const { addingWidget, cursorVisible, cursorStyle, setAddingWidget, setCursorVisible, setCursorStyle } =
     useEditorState(sceneComposerId);
@@ -27,9 +29,17 @@ export const ViewCursorWidget = () => {
     return window.removeEventListener('keyup', setAddingWidget as any);
   }, [addingWidget]);
 
+  const rootObject = scene.getObjectByName(ROOT_OBJECT_3D_NAME);
+  let largestDimension;
+  if (rootObject) {
+    const size = getSafeBoundingBox(rootObject).getSize(new THREEVector3());
+    size.multiplyScalar(0.15);
+    largestDimension = Math.max(...size.toArray(), 1);
+  }
+
   const shape = useMemo(() => {
-    return convertSvgToMesh(data);
-  }, [data]);
+    return convertSvgToMesh(data, largestDimension);
+  }, [data, largestDimension]);
 
   /* istanbul ignore next */
   useFrame(({ raycaster, scene }) => {
