@@ -14,6 +14,7 @@ function extensions(extendLoader?: (loader: TwinMakerGLTFLoader) => void) {
   };
 }
 
+const manager = new LoadingManager()
 /**
  * Extend the drei useGLTF hook to explicitly support loading manager.
  */
@@ -28,9 +29,10 @@ export function useGLTF<T extends string | string[]>(
     path,
     extensions((loader) => {
       if (extendLoader) extendLoader(loader);
-      if (!loader.manager) {
-        loader.manager = DefaultLoadingManager;
-      }
+      // if (!loader.manager) {
+        console.log('xxxxx loader.manager', loader.manager)
+        loader.manager = manager;
+      // }
 
       if (uriModifier) loader.manager.setURLModifier(uriModifier);
     }),
@@ -49,9 +51,11 @@ useGLTF.preload = (
     path,
     extensions((loader) => {
       if (extendLoader) extendLoader(loader);
-      if (!loader.manager) {
-        loader.manager = new LoadingManager();
-      }
+      // if (!loader.manager) {
+        console.log('xxxxx loader.manager', loader.manager)
+
+        loader.manager = manager;
+      // }
 
       if (uriModifier) loader.manager.setURLModifier(uriModifier);
     }),

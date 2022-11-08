@@ -79,7 +79,6 @@ export const WebGLCanvasManager: React.FC = () => {
   return (
     <React.Fragment>
       <EditorMainCamera />
-      {environmentPreset in presets && <Environment preset={environmentPreset} />}
       <group name={ROOT_OBJECT_3D_NAME} dispose={null}>
         {rootNodeRefs &&
           rootNodeRefs.map((rootNodeRef) => {
@@ -126,6 +125,8 @@ export const WebGLCanvasManager: React.FC = () => {
           </IntlProvider>
 
           {getGlobalSettings().debugMode && <StatsWindow parent={domRef} />}
+          {environmentPreset in presets && <Environment preset={environmentPreset} />}
+
         </React.Fragment>
       )}
     </React.Fragment>
