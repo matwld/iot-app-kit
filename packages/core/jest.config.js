@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-undef
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
   setupFilesAfterEnv: ['jest-extended/all'],
   collectCoverageFrom: ['src/**/*.{ts,tsx}'],
@@ -16,5 +15,8 @@ module.exports = {
       functions: 80,
       lines: 80,
     },
+  },
+  transform: {
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
 };
