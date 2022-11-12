@@ -71,25 +71,42 @@ const SubModelTree: FC<SubModelTreeProps> = ({
       selector: object3D.name,
     };
 
-    const node = {
-      ref: nodeRef,
+    console.log(parentRef);
+    const subModelContainerNode = {
+      ref: generateUUID(),
       name: object3D.name,
-      components: [subModelComponent as ISceneComponentInternal],
+      components: [],
       parentRef,
       transform: {
-        position: [object3D.position.x, object3D.position.y, object3D.position.z],
-        scale: [object3D.scale.x, object3D.scale.y, object3D.scale.z],
-        rotation: [object3D.rotation.x, object3D.rotation.y, object3D.rotation.z],
+        position: [0, 0, 0],
+        scale: [0, 0, 0],
+        rotation: [0, 0, 0],
       },
-      transformConstraint: {
-        snapToFloor: true,
-      },
+      transformConstraint: {},
       childRefs: [],
       properties: {
         subModelId: object3D.name,
       },
     } as ISceneNodeInternal;
 
+    const node = {
+      ref: nodeRef,
+      name: `${object3D.name}_Mesh`,
+      components: [subModelComponent as ISceneComponentInternal],
+      parentRef: subModelContainerNode.ref,
+      transform: {
+        position: [object3D.position.x, object3D.position.y, object3D.position.z],
+        scale: [object3D.scale.x, object3D.scale.y, object3D.scale.z],
+        rotation: [object3D.rotation.x, object3D.rotation.y, object3D.rotation.z],
+      },
+      transformConstraint: {
+        snapToFloor: false,
+      },
+      childRefs: [],
+      properties: {},
+    } as ISceneNodeInternal;
+
+    appendSceneNodeInternal(subModelContainerNode);
     appendSceneNodeInternal(node);
     setSceneNodeObject3DMapping(nodeRef, object3D); // Cache Reference
   }, [object3D, document.nodeMap]);

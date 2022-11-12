@@ -5,7 +5,7 @@ import { SkeletonUtils } from 'three-stdlib';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 
 import useLifecycleLogging from '../../../logger/react-logger/hooks/useLifecycleLogging';
-import { Vector3, KnownComponentType } from '../../../interfaces';
+import { KnownComponentType, Vector3 } from '../../../interfaces';
 import { IModelRefComponentInternal, ISceneNodeInternal, useEditorState, useStore } from '../../../store';
 import { appendFunction } from '../../../utils/objectUtils';
 import { sceneComposerIdContext } from '../../../common/sceneComposerIdContext';
@@ -49,6 +49,7 @@ export const GLTFModelComponent: React.FC<GLTFModelProps> = ({
   const maxAnisotropy = useMemo(() => gl.capabilities.getMaxAnisotropy(), []);
   const uriModifier = useStore(sceneComposerId)((state) => state.getEditorConfig().uriModifier);
   const appendSceneNode = useStore(sceneComposerId)((state) => state.appendSceneNode);
+  const updateSceneNode = useStore(sceneComposerId)((state) => state.updateSceneNode);
   const getObject3DBySceneNodeRef = useStore(sceneComposerId)((state) => state.getObject3DBySceneNodeRef);
   const { getSceneNodeByRef } = useStore(sceneComposerId)((state) => state);
   const {
@@ -165,20 +166,42 @@ export const GLTFModelComponent: React.FC<GLTFModelProps> = ({
       const hierarchicalParent = findNearestViableParentAncestorNodeRef(e.object);
       const hierarchicalParentNode = getSceneNodeByRef(hierarchicalParent?.userData.nodeRef);
       let physicalParent = hierarchicalParent;
-      if (findComponentByType(hierarchicalParentNode, KnownComponentType.SubModelRef)) {
+      const isSubModel = !!findComponentByType(hierarchicalParentNode, KnownComponentType.SubModelRef);
+      if (isSubModel) {
         while (physicalParent) {
           if (physicalParent.userData.componentTypes?.includes(KnownComponentType.ModelRef)) break;
           physicalParent = physicalParent.parent as THREE.Object3D<Event>;
         }
       }
+
+      console.log('hierarchicalParent', hierarchicalParent);
+      console.log('hierarchicalParentNode', hierarchicalParentNode);
+      console.log('isSubModel', isSubModel);
+      console.log('physicalParent', physicalParent);
+
       const { position } = getIntersectionTransform(e.intersections[0]);
       const newWidgetNode = createNodeWithPositionAndNormal(
         addingWidget,
         position,
         cursorLookAt,
         physicalParent,
-        hierarchicalParent?.userData.nodeRef,
+        isSubModel ? hierarchicalParentNode?.parentRef : undefined,
       );
+      const subModelContainerNode = getSceneNodeByRef(hierarchicalParentNode?.parentRef);
+      const transform = {
+        position: newWidgetNode.transform.position,
+        rotation: newWidgetNode.transform.rotation,
+        scale: newWidgetNode.transform.scale,
+      };
+      if (subModelContainerNode) {
+        updateSceneNode(subModelContainerNode.ref, { transform });
+        newWidgetNode.transform = {
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+          scale: [0, 0, 0],
+        };
+      }
+
       appendSceneNode(newWidgetNode);
       setAddingWidget(undefined);
       e.stopPropagation();

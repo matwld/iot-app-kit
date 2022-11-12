@@ -28,7 +28,7 @@ const ChildGroup = ({ node }: { node: ISceneNodeInternal }) => {
 
   /* istanbul ignore next: Nullish coalesce */
   const childViews = node.childRefs?.map(getSceneNodeByRef)?.filter(isISceneNodeInternal);
-
+  if (node.properties.subModelId) console.log('SubModelContainerNode', node, childViews);
   return (
     <group name={getChildrenGroupName(node.ref)}>
       {

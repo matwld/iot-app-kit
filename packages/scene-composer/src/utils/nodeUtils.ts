@@ -95,12 +95,15 @@ export const createNodeWithPositionAndNormal = (
   position: THREE.Vector3,
   normal: THREE.Vector3,
   parent?: THREE.Object3D,
-  targetRef?: string,
+  hierarchicalRef?: string,
 ): ISceneNodeInternal => {
   const finalPosition = parent?.worldToLocal(position.clone()) ?? position;
+
+  console.log('TargetRef', hierarchicalRef);
+  console.log('parentRef', parent?.userData.nodeRef);
   return {
     ...newWidget.node,
-    parentRef: targetRef || parent?.userData.nodeRef,
+    parentRef: hierarchicalRef ?? parent?.userData.nodeRef,
     transform: {
       position: finalPosition.toArray(),
       rotation: [0, 0, 0], // TODO: Find why the normal is producing weird orientations
