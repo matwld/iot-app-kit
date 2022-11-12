@@ -61,7 +61,7 @@ export const useSceneHierarchyData = () => {
 };
 
 const toSceneHeirarchyNode = (
-  { ref, name, parentRef, childRefs = [], components }: ISceneNodeInternal | Readonly<ISceneNodeInternal>,
+  { ref, name, parentRef, childRefs = [], components, properties }: ISceneNodeInternal | Readonly<ISceneNodeInternal>,
   canExpand: boolean,
   hideChild?: boolean,
 ) => {
@@ -71,7 +71,7 @@ const toSceneHeirarchyNode = (
     componentTypes: components.map((c) => c.type),
     hasChildren: canExpand,
     childRefs: hideChild ? [] : childRefs,
-    parentRef,
+    parentRef: properties?.hierarchyParentRef ?? parentRef,
   } as ISceneHierarchyNode;
 };
 
@@ -150,7 +150,11 @@ const SceneHierarchyDataProvider: FC<SceneHierarchyDataProviderProps> = ({ selec
   const getChildNodes = useCallback(
     async (parentRef?: string) => {
       const results = Object.values(nodeMap)
-        .filter((node) => node.parentRef === parentRef)
+        .filter((node) =>
+          node.properties?.hierarchyParentRef
+            ? node.properties?.hierarchyParentRef === parentRef
+            : node.parentRef === parentRef,
+        )
         .map((item) =>
           toSceneHeirarchyNode(item, Object.values(nodeMap).filter((n) => n.parentRef === item.ref).length > 0),
         )

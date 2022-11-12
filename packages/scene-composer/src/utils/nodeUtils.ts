@@ -100,11 +100,14 @@ export const createNodeWithPositionAndNormal = (
   const finalPosition = parent?.worldToLocal(position.clone()) ?? position;
   return {
     ...newWidget.node,
-    parentRef: targetRef || parent?.userData.nodeRef,
+    parentRef: parent?.userData.nodeRef,
     transform: {
       position: finalPosition.toArray(),
       rotation: [0, 0, 0], // TODO: Find why the normal is producing weird orientations
       scale: [1, 1, 1],
+    },
+    properties: {
+      hierarchyParentRef: targetRef,
     },
   } as ISceneNodeInternal;
 };
@@ -131,11 +134,14 @@ export const createNodeWithTransform = (
   const node = (newWidget as AddingWidgetInfo).node ? (newWidget as AddingWidgetInfo).node : newWidget;
   return {
     ...node,
-    parentRef: targetRef || parent?.userData.nodeRef,
+    parentRef: parent?.userData.nodeRef,
     transform: {
       position: finalTransform.position.toArray(),
       rotation: finalTransform.rotation.toVector3().toArray(),
       scale: scale.toArray(),
+    },
+    properties: {
+      hierarchyParentRef: targetRef,
     },
   } as ISceneNodeInternal;
 };

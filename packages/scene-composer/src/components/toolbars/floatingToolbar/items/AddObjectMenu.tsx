@@ -81,6 +81,8 @@ export const AddObjectMenu = () => {
     return getSceneNodeByRef(selectedSceneNodeRef);
   }, [getSceneNodeByRef, selectedSceneNodeRef]);
 
+  const selectedIsSubModel = !!findComponentByType(selectedSceneNode, KnownComponentType.SubModelRef);
+
   const sceneContainsEnvironmentModel = useMemo(() => {
     return (
       Object.values(nodeMap).filter((node) => {
@@ -144,14 +146,15 @@ export const AddObjectMenu = () => {
     const node = {
       name: 'Tag',
       components: [anchorComponent],
-      parentRef: getRefForParenting(),
+      parentRef: selectedIsSubModel ? selectedSceneNode?.parentRef : getRefForParenting(),
     } as ISceneNodeInternal;
     if (enhancedEditingEnabled) {
       setAddingWidget({ type: KnownComponentType.Tag, node });
     } else {
+      node.properties.hierarchyParentRef = selectedIsSubModel ? selectedSceneNodeRef : undefined;
       appendSceneNode(node);
     }
-  }, [enhancedEditingEnabled, getRefForParenting, appendSceneNode, setAddingWidget]);
+  }, [enhancedEditingEnabled, getRefForParenting, appendSceneNode, setAddingWidget, selectedIsSubModel]);
 
   const handleAddColorOverlay = () => {
     // Requires a selected scene node
@@ -168,7 +171,10 @@ export const AddObjectMenu = () => {
   const handleAddEmpty = () => {
     const node = {
       name: 'Node',
-      parentRef: getRefForParenting(),
+      parentRef: selectedIsSubModel ? selectedSceneNode?.parentRef : getRefForParenting(),
+      properties: {
+        hierarchyParentRef: selectedIsSubModel ? selectedSceneNodeRef : undefined,
+      },
     } as unknown as ISceneNodeInternal;
 
     appendSceneNode(node);
@@ -184,7 +190,10 @@ export const AddObjectMenu = () => {
     appendSceneNode({
       name: 'Light',
       components: [lightComponent],
-      parentRef: getRefForParenting(),
+      parentRef: selectedIsSubModel ? selectedSceneNode?.parentRef : getRefForParenting(),
+      properties: {
+        hierarchyParentRef: selectedIsSubModel ? selectedSceneNodeRef : undefined,
+      },
     });
   };
 
@@ -251,12 +260,13 @@ export const AddObjectMenu = () => {
         const node = {
           name: filename,
           components: [gltfComponent],
-          parentRef: mustBeRoot ? undefined : getRefForParenting(),
+          parentRef: mustBeRoot ? undefined : selectedIsSubModel ? selectedSceneNode?.parentRef : getRefForParenting(),
         } as unknown as ISceneNodeInternal;
 
         if (enhancedEditingEnabled && !modelType) {
           setAddingWidget({ type: KnownComponentType.ModelRef, node });
         } else {
+          node.properties.hierarchyParentRef = selectedIsSubModel ? selectedSceneNodeRef : undefined;
           appendSceneNode(node);
         }
       });
@@ -277,12 +287,13 @@ export const AddObjectMenu = () => {
     const node = {
       name: 'MotionIndicator',
       components: [motionIndicatorComponent],
-      parentRef: getRefForParenting(),
+      parentRef: selectedIsSubModel ? selectedSceneNode?.parentRef : getRefForParenting(),
     } as unknown as ISceneNodeInternal;
 
     if (enhancedEditingEnabled) {
       setAddingWidget({ type: KnownComponentType.MotionIndicator, node });
     } else {
+      node.properties.hierarchyParentRef = selectedIsSubModel ? selectedSceneNodeRef : undefined;
       appendSceneNode(node);
     }
   };

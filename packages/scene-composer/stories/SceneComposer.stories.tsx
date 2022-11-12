@@ -509,6 +509,8 @@ WaterTank.args = {
       [COMPOSER_FEATURES.SubModelSelection]: true,
       [COMPOSER_FEATURES.ENHANCED_EDITING]: true,
       [COMPOSER_FEATURES.OpacityRule]: true,
+      [COMPOSER_FEATURES.CameraView]: true,
+      [COMPOSER_FEATURES.SubModelMovement]: true,
     },
   },
 };
