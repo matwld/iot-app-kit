@@ -236,6 +236,7 @@ const StateManager: React.FC<SceneComposerInternalProps> = ({
   useEffect(() => {
     if (onSceneUpdated) {
       return useStore(sceneComposerId).subscribe((state) => {
+        console.log('Should save?', state.lastOperation);
         if (state.lastOperation) {
           if (SceneComposerOperationTypeMap[state.lastOperation] === 'UPDATE_DOCUMENT') {
             onSceneUpdated(sceneDocumentSnapshotCreator.create(state));

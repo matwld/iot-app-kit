@@ -116,14 +116,15 @@ export const undoMiddleware =
     return config(
       (args) => {
         // Take a snapshot of the current state
+        const state = get(); // This fixes getting a state after a change
         const snapshot = {
-          prevStates: [...getState().prevStates, { ...get() }],
+          prevStates: [...getState().prevStates, { ...state }],
           setStore: set,
           futureStates: [],
           getStore: get,
         };
 
-        if (!get().getUndoState) {
+        if (!state.getUndoState) {
           // inject helper functions to user defined store.
           set({
             undo,
@@ -136,8 +137,10 @@ export const undoMiddleware =
 
         set(args);
 
-        const lastOperation = get().lastOperation || '';
+        const lastOperation = state.lastOperation || ''; // This get() was overriding the last operation due to how fast the events went
         const lastOperationType = SceneComposerOperationTypeMap[lastOperation];
+        console.log('Undo state set:', lastOperation);
+        console.log(snapshot);
 
         LOG.verbose('lastOperation', lastOperation, 'maps to', lastOperationType);
 
@@ -148,7 +151,7 @@ export const undoMiddleware =
         } else if (lastOperationType === 'UPDATE_DOCUMENT') {
           // insert snapshot into the history
           LOG.verbose('insert a new state in undo history', snapshot);
-          setState(snapshot);
+          setState(snapshot); // This happens for the SetCursorVisible faster than subscribe is fired.
         } else {
           LOG.verbose("skip the current state as it's not updating the document");
         }

@@ -299,6 +299,7 @@ export const createEditStateSlice = (set: SetState<RootState>, get: GetState<Roo
 
     setCursorVisible(isVisible: boolean) {
       set((draft) => {
+        console.log(get().lastOperation);
         draft.cursorVisible = isVisible;
         draft.lastOperation = 'setCursorVisible';
       });

@@ -165,6 +165,7 @@ const knobsConfigurationDecorator = [
     args.onSceneUpdated = useCallback((e) => {
       stagedSceneDocumentSnapshotRef.current = e;
       configuredOnSceneUpdatedCallback(e);
+      console.log('Updated');
     }, []);
 
     const sceneComposerApi = useSceneComposerApi('scene1');

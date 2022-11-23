@@ -154,7 +154,9 @@ export const createSceneDocumentSlice = (
         draft.selectedSceneNodeRef = node.ref;
 
         draft.lastOperation = 'appendSceneNodeInternal';
+        console.log('Last Operation Set is append');
       });
+      console.log(get().lastOperation);
     },
 
     updateSceneNodeInternal: (ref, partial, isTransient) => {
