@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { Object3D } from 'three';
 
 import ISceneHierarchyNode from '../../model/ISceneHierarchyNode';
