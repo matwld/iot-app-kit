@@ -22,8 +22,14 @@ import { EditorMainCamera } from './three-fiber/EditorCamera';
 import { EditorTransformControls } from './three-fiber/EditorTransformControls';
 import { SceneInfoView } from './three-fiber/SceneInfoView';
 import IntlProvider from './IntlProvider';
+import { DefaultLoadingManager, LoadingManager } from 'three';
+import { managers } from './three-fiber/ModelRefComponent/GLTFLoader';
 
 const GIZMO_MARGIN: [number, number] = [72, 72];
+export const envManagers = [new LoadingManager()];
+let oldLoader;
+
+let hasSet = false;
 
 export const WebGLCanvasManager: React.FC = () => {
   const log = useLifecycleLogging('WebGLCanvasManager');
@@ -79,7 +85,21 @@ export const WebGLCanvasManager: React.FC = () => {
   return (
     <React.Fragment>
       <EditorMainCamera />
-      {environmentPreset in presets && <Environment preset={environmentPreset} />}
+      {environmentPreset in presets && <Environment preset={environmentPreset} extensions={(loader) => {
+        if (!hasSet) {
+          loader.manager = envManagers[0];
+          console.log('xxxx urimod env', loader.manager.resolveURL('a/b/c.jpg'))
+          // loader.manager.setURLModifier((uri) => 'http://localhost:6006/' + uri)
+          hasSet = true;
+        } else {
+          envManagers[1] = loader.manager;
+        }
+
+        console.log('xxxx urimod env after: isEnvManager=', loader.manager == envManagers[0], ', isGltfManager=', loader.manager == managers[1], ', isDefault=', loader.manager == DefaultLoadingManager, loader.manager.resolveURL('a/b/c.jpg'), loader)
+
+        console.log('xxxx urimod env after: same loader', oldLoader == loader);
+        oldLoader = loader;
+      }} />}
       <group name={ROOT_OBJECT_3D_NAME} dispose={null}>
         {rootNodeRefs &&
           rootNodeRefs.map((rootNodeRef) => {
