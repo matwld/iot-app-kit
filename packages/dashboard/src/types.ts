@@ -62,6 +62,7 @@ export type AppKitWidget = Widget & {
   readOnly?: boolean;
   isEditing?: boolean;
   properties?: ChartConfig;
+  // Add in some property that maps an asset query id to it's details???
 };
 
 export type TextWidget = Widget & {

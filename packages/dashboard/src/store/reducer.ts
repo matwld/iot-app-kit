@@ -76,6 +76,11 @@ export const dashboardReducer: Reducer<DashboardState, DashboardAction> = (
       return updateWidgets(state, action);
     }
 
+    /**
+     * Add in the new action for UPDATE_ASSET_QUERY
+     * Add in the new action for  DESCRIBE_ASSET_MODELS_SUCCEEDED and DESCRIBE_ASSET_MODELS_FAILED
+     */
+
     default:
       return state;
   }
