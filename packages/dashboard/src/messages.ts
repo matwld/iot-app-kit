@@ -107,6 +107,14 @@ export type SidePanelMessages = {
     toggle: string;
     url: string;
   };
+
+  thresholdSettings: {
+    if: string;
+    colorDataToggle: string;
+    title: string;
+    containsLabel: string;
+    thresholdPlaceHolder: string;
+  };
 };
 
 export type DashboardMessages = {
@@ -232,6 +240,13 @@ export const DefaultDashboardMessages: DashboardMessages = {
       title: 'Link',
       toggle: 'Create link',
       url: 'URL',
+    },
+    thresholdSettings: {
+      if: 'if',
+      colorDataToggle: 'Apply threshold color across all data',
+      title: 'Threshold',
+      containsLabel: 'Contains',
+      thresholdPlaceHolder: 'Threshold value',
     },
   },
 };

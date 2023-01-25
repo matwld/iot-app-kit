@@ -4,14 +4,14 @@ import { DashboardState } from '../../../../store/state';
 import { useInput } from '../../utils';
 import { StyleSettingsMap } from '@iot-app-kit/core';
 import { Grid, Icon, SpaceBetween } from '@cloudscape-design/components';
-import { PropertyComponentMessages } from '../../../../messages';
+import { DashboardMessages } from '../../../../messages';
 
 export type PropertyComponentProps = {
   assetId: string;
   propertyId: string;
   refId: string;
   onDeleteAssetQuery: () => void;
-  message: PropertyComponentMessages;
+  messageOverrides: DashboardMessages;
 };
 
 export const PropertyComponent: FC<PropertyComponentProps> = ({
@@ -19,7 +19,11 @@ export const PropertyComponent: FC<PropertyComponentProps> = ({
   propertyId,
   refId,
   onDeleteAssetQuery,
-  message,
+  messageOverrides: {
+    sidePanel: {
+      propertySection: { propertyComponent },
+    },
+  },
 }) => {
   const assetDescription = useSelector((state: DashboardState) => state.assetsDescriptionMap)?.[assetId];
   const assetProperties = assetDescription?.assetProperties;
@@ -62,12 +66,12 @@ export const PropertyComponent: FC<PropertyComponentProps> = ({
         <SpaceBetween size={'xxs'} direction={'horizontal'}>
           {dataType && (
             <small>
-              {message.dataType}: {dataType}
+              {propertyComponent.dataType}: {dataType}
             </small>
           )}
           {unit && (
             <small>
-              {message.unit}: {unit}
+              {propertyComponent.unit}: {unit}
             </small>
           )}
         </SpaceBetween>

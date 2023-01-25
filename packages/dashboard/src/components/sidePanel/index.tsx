@@ -6,9 +6,10 @@ import { DashboardState } from '../../store/state';
 import { DashboardMessages } from '../../messages';
 import { AppKitComponentTags } from '../../types';
 import TextSettings from './sections/textSettingSection/text';
-import DataSettings from './sections/dataSettings';
 import LinkSettings from './sections/textSettingSection/link';
 import { BaseSettings } from './sections/baseSettingSection';
+import ThresholdsSection from './sections/thresholdsSection/thresholdsSection';
+import PropertiesAlarmsSection from './sections/propertiesAlarmSection';
 
 const SidePanel: FC<{ messageOverrides: DashboardMessages }> = ({ messageOverrides }) => {
   const selectedWidgets = useSelector((state: DashboardState) => state.selectedWidgets);
@@ -16,9 +17,6 @@ const SidePanel: FC<{ messageOverrides: DashboardMessages }> = ({ messageOverrid
     return <div>Currently we only support changing setting for one widget only.</div>;
   }
 
-  const {
-    sidePanel: { propertySection },
-  } = messageOverrides;
   const selectedWidget = selectedWidgets[0];
   const isAppKitWidget = AppKitComponentTags.find((tag) => tag === selectedWidget.componentTag);
   const isTextWidget = selectedWidget.componentTag === 'text';
@@ -31,9 +29,9 @@ const SidePanel: FC<{ messageOverrides: DashboardMessages }> = ({ messageOverrid
         {isTextWidget && <LinkSettings messageOverride={messageOverrides} />}
         {isAppKitWidget && (
           <>
-            {/* WIP <PropertiesAlarmsSection messageOverrides={messageOverrides} />*/}
-            {/* WIP <ThresholdsSection messageOverrides={messageOverrides} />*/}
-            <DataSettings />
+            <PropertiesAlarmsSection messageOverrides={messageOverrides} />
+            <ThresholdsSection messageOverrides={messageOverrides} />
+            {/*<DataSettings />*/}
           </>
         )}
       </SpaceBetween>
