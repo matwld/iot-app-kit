@@ -43,3 +43,12 @@ iot-status-grid .grid,
 iot-status-grid .tooltip-container {
   height: 100%;
 }
+
+
+iot-status-grid .grid {
+  margin: 0 !important;
+}
+
+iot-status-grid .status-cell {
+  padding: 20px !important;
+}
