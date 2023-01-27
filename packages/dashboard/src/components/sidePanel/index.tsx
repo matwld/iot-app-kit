@@ -52,7 +52,24 @@ const SidePanel: FC<{ messageOverrides: DashboardMessages }> = ({ messageOverrid
           );
         }}
       >
-        Add RPM property to widget
+        PRM
+      </Button>
+      <Button
+        onClick={() => {
+          dispatch(
+            onUpdateAssetQueryAction({
+              widget: selectedWidgets[0] as AppKitWidget,
+              assetQuery: [
+                {
+                  assetId: '8f74f96e-325e-43c5-99c3-b2a88fd89a6c',
+                  properties: [{ propertyId: '6ca0d672-08d3-4cae-a54f-ae99b48d7163' }],
+                },
+              ],
+            })
+          );
+        }}
+      >
+        Location
       </Button>
     </Container>
   );

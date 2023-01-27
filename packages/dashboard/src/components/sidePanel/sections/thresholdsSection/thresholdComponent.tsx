@@ -107,11 +107,6 @@ export const ThresholdComponent: FC<{ path: string; deleteSelf: () => void; mess
     updateValue(Number.isNaN(value) ? detail.value : value);
   };
 
-  const onAddNewValueToThresholdList = (value: ThresholdValue) => {
-    if (!thresholdValueList.find((threshold) => value === threshold)) {
-      updateThresholdValueList([...thresholdValueList, value]);
-    }
-  };
 
   return (
     <Grid

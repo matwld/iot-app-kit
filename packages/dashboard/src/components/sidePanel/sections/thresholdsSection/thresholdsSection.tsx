@@ -21,7 +21,7 @@ const ThresholdsSection: FC<ThresholdsSectionProps> = ({ messageOverrides }) => 
     e.stopPropagation();
     const newThreshold: YAnnotation = {
       color: DEFAULT_THRESHOLD_COLOR,
-      comparisonOperator: COMPARISON_OPERATOR.GREATER_THAN_EQUAL,
+      comparisonOperator: COMPARISON_OPERATOR.EQUAL,
       value: '',
     };
     updateThresholdList([...thresholdList, newThreshold]);
