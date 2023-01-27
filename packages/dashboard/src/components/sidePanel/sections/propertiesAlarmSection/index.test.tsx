@@ -102,7 +102,7 @@ describe('PropertyComponent', () => {
     assetDescription.assetProperties
       ?.filter((p) => p.alias)
       .forEach(({ alias }) => {
-        expect(screen.getByText(alias as string));
+        expect(screen.getByText(`Alias: ${alias}`));
       });
   });
 

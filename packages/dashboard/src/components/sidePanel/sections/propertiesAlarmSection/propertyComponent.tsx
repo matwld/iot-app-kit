@@ -5,6 +5,7 @@ import { useInput } from '../../utils';
 import { StyleSettingsMap } from '@iot-app-kit/core';
 import { Grid, Icon, SpaceBetween } from '@cloudscape-design/components';
 import { DashboardMessages } from '../../../../messages';
+import ColorPicker from '../../shared/colorPicker';
 
 export type PropertyComponentProps = {
   assetId: string;
@@ -28,7 +29,9 @@ export const PropertyComponent: FC<PropertyComponentProps> = ({
   const assetDescription = useSelector((state: DashboardState) => state.assetsDescriptionMap)?.[assetId];
   const assetProperties = assetDescription?.assetProperties;
   const assetProperty = assetProperties?.find((prop) => prop.id === propertyId);
-  const label = (assetProperty?.name && `${assetProperty.name} (${assetDescription?.assetName || ''})`) || propertyId;
+  const defaultName =
+    assetProperty?.name && assetDescription?.assetName && `${assetProperty?.name} (${assetDescription?.assetName})`;
+  const label = defaultName || propertyId;
   const [styleSettings = {}, updateStyleSettings] = useInput<StyleSettingsMap>(`styleSettings`);
   const color = styleSettings[refId]?.color;
   const { dataType, unit, alias } = assetProperty || {};
@@ -43,27 +46,24 @@ export const PropertyComponent: FC<PropertyComponentProps> = ({
 
   return (
     <Grid gridDefinition={[{ colspan: 12 }]}>
-      <SpaceBetween size="xxxs">
-        <SpaceBetween size={'xxxs'} direction={'horizontal'}>
-          <div className="color-picker-container" style={{ backgroundColor: color }}>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => {
-                updatePropertyColor(e.target.value);
-              }}
-            />
+      <SpaceBetween size="xxxs" direction={'vertical'}>
+        <Grid gridDefinition={[{ colspan: 0 }, { colspan: 7 }, { colspan: 3 }]}>
+          <div className="threshold-content-item with-gutter grow">
+            <ColorPicker color={color || ''} updateColor={() => updatePropertyColor} />
           </div>
-          <span>{label}</span>
-          <div onClick={onDeleteAssetQuery} style={{ flex: 'end' }}>
-            <Icon name={'close'} />
-          </div>
-        </SpaceBetween>
 
-        <SpaceBetween size={'xxs'} direction={'horizontal'}>
-          {alias && <small>{alias}</small>}
-        </SpaceBetween>
-        <SpaceBetween size={'xxs'} direction={'horizontal'}>
+          <div className="threshold-content-item with-gutter grow">
+            <span>{label}</span>
+          </div>
+          <div className="threshold-content-item with-gutter grow">
+            <div onClick={onDeleteAssetQuery} className="justify-content-end">
+              <Icon name={'close'} />
+            </div>
+          </div>
+        </Grid>
+
+        <SpaceBetween size={'xs'} direction={'horizontal'}>
+          {alias && <small>Alias: {alias}</small>}
           {dataType && (
             <small>
               {propertyComponent.dataType}: {dataType}
