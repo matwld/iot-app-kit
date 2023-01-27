@@ -16,3 +16,30 @@
 .error-icon {
   max-height: 50px;
 }
+
+iot-status-grid sc-grid-tooltip:not(:first-child) {
+  display: none !important;
+}
+
+.widget:has(iot-status-grid) {
+  display: flex;
+}
+
+iot-status-grid,
+iot-status-grid iot-time-series-connector,
+iot-status-grid sc-status-grid,
+iot-status-grid sc-widget-grid,
+iot-status-grid sc-widget-grid > div,
+iot-status-grid sc-grid {
+  flex: 1;
+  display: flex;
+}
+
+iot-status-grid .grid-wrapper {
+  flex: 1;
+}
+
+iot-status-grid .grid,
+iot-status-grid .tooltip-container {
+  height: 100%;
+}
