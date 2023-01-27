@@ -47,11 +47,10 @@ export const PropertyComponent: FC<PropertyComponentProps> = ({
   return (
     <Grid gridDefinition={[{ colspan: 12 }]}>
       <SpaceBetween size="xxxs" direction={'vertical'}>
-        <Grid gridDefinition={[{ colspan: 0 }, { colspan: 7 }, { colspan: 3 }]}>
+        <Grid gridDefinition={[{ colspan: 0 }, { colspan: 7 }, { colspan: 3 }]} disableGutters>
           <div className="threshold-content-item with-gutter grow">
-            <ColorPicker color={color || ''} updateColor={() => updatePropertyColor} />
+            <ColorPicker color={color || ''} updateColor={updatePropertyColor} />
           </div>
-
           <div className="threshold-content-item with-gutter grow">
             <span>{label}</span>
           </div>
