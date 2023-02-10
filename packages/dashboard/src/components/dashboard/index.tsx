@@ -2,7 +2,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 
 import { WebglContext } from '@iot-app-kit/react-components';
 

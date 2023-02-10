@@ -1,6 +1,7 @@
 import { Dispatch, useEffect, useState } from 'react';
-// import { useDispatch } from 'react-redux';
-import { cloneDeep, get, set } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import set from 'lodash/set';
 import { useDispatch, useSelector } from 'react-redux';
 import { DashboardState } from '../../../store/state';
 import { onUpdateWidgetsAction } from '../../../store/actions';

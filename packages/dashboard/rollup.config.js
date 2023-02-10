@@ -8,6 +8,7 @@ import postcss from 'rollup-plugin-postcss';
 import json from '@rollup/plugin-json';
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 import url from 'postcss-url';
+import externals from 'rollup-plugin-node-externals';
 
 const packageJson = require('./package.json'); // eslint-disable-line
 
@@ -27,6 +28,7 @@ export default [
       },
     ],
     plugins: [
+      externals(),
       nodePolyfills({ crypto: true }),
       peerDepsExternal(),
       nodeResolve({
