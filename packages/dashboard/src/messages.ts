@@ -31,10 +31,15 @@ export type TextWidgetMessages = {
   editLinkLabel: string;
 };
 
+export type InputWidgetMessages = {
+  submitLabel: string;
+};
+
 export type WidgetsMessages = {
   invalidTagHeader: string;
   invalidTagSubheader: string;
   text: TextWidgetMessages;
+  input: InputWidgetMessages;
 };
 
 export type ToolbarMessages = {
@@ -170,6 +175,9 @@ export const DefaultDashboardMessages: DashboardMessages = {
       removeAction: 'Remove',
       editTextLabel: 'Text',
       editLinkLabel: 'Link',
+    },
+    input: {
+      submitLabel: 'Send',
     },
   },
   contextMenu: {

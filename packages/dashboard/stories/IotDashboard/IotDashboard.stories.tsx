@@ -40,7 +40,22 @@ try {
 const args = {
   client,
   dashboardConfiguration: {
-    widgets: [],
+    widgets: [
+      {
+        id: 'mock-text-widget',
+        componentTag: 'input',
+        x: 0,
+        y: 0,
+        z: 1,
+        width: 30,
+        height: 5,
+        options: [
+          { label: 'Going to lunch', value: '1' },
+          { label: 'Company event', value: '2' },
+          { label: 'Taking training', value: '3' }
+        ]
+      }
+    ],
     viewport: { duration: '5m' },
   },
   query,
@@ -64,11 +79,20 @@ const readOnlyArgs = {
   dashboardConfiguration: {
     viewport: { duration: '5m' },
     widgets: [
-      MockWidgetFactory.getTextWidget({ x: 0, y: 0, width: 30, height: 2 }),
-      MockWidgetFactory.getKpiWidget({ x: 0, y: 3, width: 30, height: 20 }),
-      MockWidgetFactory.getKpiWidget({ x: 31, y: 3, width: 30, height: 20 }),
-      MockWidgetFactory.getLineChartWidget({ x: 0, y: 24, width: 30, height: 30 }),
-      MockWidgetFactory.getLineChartWidget({ x: 31, y: 24, width: 30, height: 30 }),
+      {
+        id: 'mock-text-widget',
+        componentTag: 'input',
+        x: 0,
+        y: 0,
+        z: 1,
+        width: 30,
+        height: 5,
+        options: [
+          { label: 'Going to lunch', value: '1' },
+          { label: 'Company event', value: '2' },
+          { label: 'Taking training', value: '3' }
+        ]
+      }
     ],
   },
   readOnly: true,
