@@ -4,8 +4,6 @@ import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { merge } from 'lodash';
 
-import { WebglContext } from '@iot-app-kit/react-components';
-
 import InternalDashboard from '../internalDashboard';
 
 import { configureDashboardStore } from '~/store';
@@ -19,14 +17,14 @@ import '@cloudscape-design/global-styles/index.css';
 import '../../styles/variables.css';
 import { IoTSiteWiseClient } from '@aws-sdk/client-iotsitewise';
 
-export type IotDashboardProps = {
+export type DashboardProps = {
   messageOverrides?: RecursivePartial<DashboardMessages>;
   query?: SiteWiseQuery;
   onSave?: (dashboard: SaveableDashboard) => void;
   client?: IoTSiteWiseClient;
 } & PickRequiredOptional<DashboardState, 'dashboardConfiguration', 'readOnly' | 'grid'>;
 
-const Dashboard: React.FC<IotDashboardProps> = ({ messageOverrides, query, onSave, client, ...dashboardState }) => {
+const Dashboard: React.FC<DashboardProps> = ({ messageOverrides, query, onSave, client, ...dashboardState }) => {
   return (
     <ClientContext.Provider value={client}>
       <Provider store={configureDashboardStore({ ...dashboardState }, client)}>
@@ -42,7 +40,6 @@ const Dashboard: React.FC<IotDashboardProps> = ({ messageOverrides, query, onSav
             onSave={onSave}
             messageOverrides={merge(messageOverrides, DefaultDashboardMessages)}
           />
-          <WebglContext />
         </DndProvider>
       </Provider>
     </ClientContext.Provider>

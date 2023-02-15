@@ -3,6 +3,7 @@ import { act } from 'react-dom/test-utils';
 import * as ReactDOM from 'react-dom';
 
 import Dashboard, { IotDashboardProps } from './index';
+import { mockQuery } from '../../../testing/siteWiseQueries';
 
 describe('Dashboard', () => {
   it('should render', function () {
@@ -10,7 +11,7 @@ describe('Dashboard', () => {
     document.body.appendChild(container);
 
     const args: IotDashboardProps = {
-      query: undefined,
+      query: mockQuery(),
       dashboardConfiguration: {
         widgets: [],
         viewport: { duration: '5m' },
