@@ -759,6 +759,10 @@
     "note": "Menu Item",
     "text": "Scale object"
   },
+  "sonIAS": {
+    "note": "choose a connection placeholder",
+    "text": "Choose a connection"
+  },
   "souLfa": {
     "note": "Form Field label",
     "text": "Property Name"
