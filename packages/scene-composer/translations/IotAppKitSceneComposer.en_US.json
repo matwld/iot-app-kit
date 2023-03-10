@@ -219,6 +219,10 @@
     "note": "rule Id label",
     "text": "Rule Id"
   },
+  "Fy5tAf": {
+    "note": "Sub-Section Header",
+    "text": "Matterport Integration"
+  },
   "GRIkbq": {
     "note": "Menu Item label",
     "text": "Camera"
@@ -655,6 +659,10 @@
     "note": "select box option text value",
     "text": "Receive Shadow"
   },
+  "o3PtbU": {
+    "note": "Sub-Section Description",
+    "text": "Connecting your Matterport account enables viewing spaces in your TwinMaker scene."
+  },
   "oEXVJ5": {
     "note": "Motion Indicator Shape in a dropdown menu",
     "text": "Linear Plane"
@@ -727,6 +735,10 @@
     "note": "Menu Item",
     "text": "Scale object"
   },
+  "sonIAS": {
+    "note": "choose a connection placeholder",
+    "text": "Choose a connection"
+  },
   "souLfa": {
     "note": "Form Field label",
     "text": "Property Name"
@@ -794,6 +806,10 @@
   "x8NTqi": {
     "note": "Menu Item",
     "text": "Add empty node"
+  },
+  "yXdV0F": {
+    "note": "ExpandableInfoSection Title",
+    "text": "3rd Party Resources"
   },
   "ylDLGq": {
     "note": "FormField label",
