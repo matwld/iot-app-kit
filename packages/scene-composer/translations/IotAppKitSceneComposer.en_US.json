@@ -255,6 +255,10 @@
     "note": "Menu Item",
     "text": "Add camera from current view"
   },
+  "IoZYOR": {
+    "note": "Select a secret placeholder",
+    "text": "Select a secret"
+  },
   "JTUN+G": {
     "note": "Form field label",
     "text": "Focal length"
@@ -443,6 +447,10 @@
     "note": "option text of a Select component",
     "text": "Arrow with background"
   },
+  "W5mTpF": {
+    "note": "Button label",
+    "text": "Learn more"
+  },
   "WAYi01": {
     "note": "checkbox option",
     "text": "Snap to floor"
@@ -538,6 +546,10 @@
   "eo5qZz": {
     "note": "Select Color type option",
     "text": "Define background color"
+  },
+  "eznlx7": {
+    "note": "Form Field label",
+    "text": "Matterport Model Id"
   },
   "fD6Gup": {
     "note": "Form Field label",
@@ -651,6 +663,10 @@
     "note": "Form section listing out properties about a 3D models materials and textures",
     "text": "Material Details"
   },
+  "nGEVE7": {
+    "note": "Desction label",
+    "text": "No Connections"
+  },
   "nGlTEq": {
     "note": "Form Field label",
     "text": "Arrow"
@@ -739,10 +755,6 @@
     "note": "Menu Item",
     "text": "Scale object"
   },
-  "sonIAS": {
-    "note": "choose a connection placeholder",
-    "text": "Choose a connection"
-  },
   "souLfa": {
     "note": "Form Field label",
     "text": "Property Name"
@@ -774,6 +786,10 @@
   "ubyV0D": {
     "note": "Remove parameter Button Text",
     "text": "Remove parameter"
+  },
+  "ugCkWy": {
+    "note": "Enter your Matterport model id placeholder",
+    "text": "Enter your Matterport model id"
   },
   "v+tpx1": {
     "note": "Menu Item label",
