@@ -1,61 +1,35 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Box, FormField, Select, SpaceBetween } from '@awsui/components-react';
-import { defineMessages, useIntl } from 'react-intl';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Box, Button, FormField, Input, Select, SpaceBetween } from '@awsui/components-react';
+import { useIntl } from 'react-intl';
 
 import useLifecycleLogging from '../../../logger/react-logger/hooks/useLifecycleLogging';
 import { useStore } from '../../../store';
 import { sceneComposerIdContext } from '../../../common/sceneComposerIdContext';
 import { KnownSceneProperty } from '../../../interfaces';
-import { pascalCase } from '../../../utils/stringUtils';
 import { getGlobalSettings, subscribe, unsubscribe } from '../../../common/GlobalSettings';
 
 export const MatterportIntegration: React.FC = () => {
-  const log = useLifecycleLogging('SettingsPanel');
-  const sceneComposerId = useContext(sceneComposerIdContext);
-  const getSceneProperty = useStore(sceneComposerId)((state) => state.getSceneProperty);
-  const setSceneProperty = useStore(sceneComposerId)((state) => state.setSceneProperty);
-  const intl = useIntl();
-
-  const get3pConnectionListFunction = getGlobalSettings().get3pConnectionListFunction;
-
+  const log = useLifecycleLogging('MatterportIntegration');
   log?.verbose('Initialize Matterport Integration');
 
-  const selectedEnvPreset = () => {
-    return getSceneProperty(KnownSceneProperty.EnvironmentPreset);
-  };
+  const intl = useIntl();
+  const sceneComposerId = useContext(sceneComposerIdContext);
 
-  log?.verbose('Selected environment preset', selectedEnvPreset());
+  const getSceneProperty = useStore(sceneComposerId)((state) => state.getSceneProperty);
+  const setSceneProperty = useStore(sceneComposerId)((state) => state.setSceneProperty);
 
-  const i18nPresetsStrings = defineMessages({
-    'No Preset': {
-      defaultMessage: 'No Preset',
-      description: 'Environment presets drop down menu options',
-    },
-    neutral: {
-      defaultMessage: 'Neutral',
-      description: 'Environment presets drop down menu options',
-    },
-    directional: {
-      defaultMessage: 'Directional',
-      description: 'Environment presets drop down menu options',
-    },
-    chromatic: {
-      defaultMessage: 'Chromatic',
-      description: 'Environment presets drop down menu options',
-    },
-  });
+  const [matterportModelId, setMatterportModelId] = useState(getSceneProperty(KnownSceneProperty.MatterportModelId));
+  const [dirty, setDirty] = useState(false);
 
-  const selectedOption = selectedEnvPreset()
-    ? {
-        label: intl.formatMessage(i18nPresetsStrings[selectedEnvPreset()]) || pascalCase(selectedEnvPreset()),
-        value: selectedEnvPreset,
-      }
-    : null;
+  log?.verbose('Selected Matterport model id: ', matterportModelId);
+
+  const selectedOption = null; // TODO
 
   const [connectionOptions, setConnectionOptions] = useState<{ label: string; value: string }[]>([]);
 
   const getConnectionList = async () => {
     const connectionList: { label: string; value: string }[] = [];
+    const get3pConnectionListFunction = getGlobalSettings().get3pConnectionListFunction;
     if (get3pConnectionListFunction) {
       const response = await get3pConnectionListFunction('AWSIoTTwinMaker_Matterport');
       if (response) {
@@ -75,9 +49,28 @@ export const MatterportIntegration: React.FC = () => {
 
   useEffect(() => {
     subscribe(onUpdated);
+    getConnectionList();
 
     return () => unsubscribe(onUpdated);
   }, []);
+
+  const onMatterportModelIdChange = useCallback(
+    (event) => {
+      const value = event.detail.value;
+      if (value !== matterportModelId) {
+        setMatterportModelId(value);
+        setDirty(true);
+      }
+    },
+    [setMatterportModelId, setDirty],
+  );
+
+  useEffect(() => {
+    if (dirty) {
+      setSceneProperty(KnownSceneProperty.MatterportModelId, matterportModelId);
+      setDirty(false);
+    }
+  }, [matterportModelId]);
 
   return (
     <React.Fragment>
@@ -91,27 +84,65 @@ export const MatterportIntegration: React.FC = () => {
             defaultMessage: 'Connecting your Matterport account enables viewing spaces in your TwinMaker scene. ',
           })}
         </Box>
-        {get3pConnectionListFunction && (
-          <FormField label={intl.formatMessage({ description: 'Form Field label', defaultMessage: 'Connection Name' })}>
-            <Select
-              selectedOption={null}
-              onChange={(e) => {
-                if (e.detail.selectedOption.value === 'n/a') {
-                  setSceneProperty(KnownSceneProperty.EnvironmentPreset, undefined);
-                } else {
-                  setSceneProperty(KnownSceneProperty.EnvironmentPreset, e.detail.selectedOption.value);
-                }
-              }}
-              options={connectionOptions}
-              selectedAriaLabel={intl.formatMessage({ defaultMessage: 'Selected', description: 'label' })}
-              disabled={false} //{connectionOptions.length === 0}
-              placeholder={intl.formatMessage({
-                defaultMessage: 'Choose a connection',
-                description: 'choose a connection placeholder',
-              })}
-              expandToViewport
-            />
-          </FormField>
+        {connectionOptions.length > 0 && (
+          <div>
+            <FormField
+              label={intl.formatMessage({ description: 'Form Field label', defaultMessage: 'Connection Name' })}
+            >
+              <Select
+                selectedOption={null}
+                onChange={(e) => {
+                  if (e.detail.selectedOption.value === 'n/a') {
+                    //setSceneProperty(KnownSceneProperty.EnvironmentPreset, undefined);
+                  } else {
+                    //setSceneProperty(KnownSceneProperty.EnvironmentPreset, e.detail.selectedOption.value);
+                  }
+                }}
+                options={connectionOptions}
+                selectedAriaLabel={intl.formatMessage({ defaultMessage: 'Selected', description: 'label' })}
+                disabled={connectionOptions.length === 0}
+                placeholder={intl.formatMessage({
+                  defaultMessage: 'Select a secret',
+                  description: 'Select a secret placeholder',
+                })}
+                expandToViewport
+              />
+            </FormField>
+            <FormField
+              label={intl.formatMessage({ description: 'Form Field label', defaultMessage: 'Matterport Model Id' })}
+            >
+              <Input
+                value={String(matterportModelId)}
+                type='text'
+                onChange={onMatterportModelIdChange}
+                placeholder={intl.formatMessage({
+                  defaultMessage: 'Enter your Matterport model id',
+                  description: 'Enter your Matterport model id placeholder',
+                })}
+              />
+            </FormField>
+          </div>
+        )}
+        {connectionOptions.length === 0 && (
+          <div style={{ textAlign: 'center' }}>
+            <SpaceBetween size='xl'>
+              <Box fontWeight='bold' textAlign='center'>
+                {intl.formatMessage({ description: 'Desction label', defaultMessage: 'No Connections' })}
+              </Box>
+              <Button
+                ariaLabel='Learn more (opens new tab)'
+                href='https://google.com'
+                iconAlign='right'
+                iconName='external'
+                target='_blank'
+              >
+                {intl.formatMessage({
+                  description: 'Button label',
+                  defaultMessage: 'Learn more',
+                })}
+              </Button>
+            </SpaceBetween>
+          </div>
         )}
       </SpaceBetween>
     </React.Fragment>
