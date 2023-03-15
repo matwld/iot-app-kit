@@ -11,7 +11,7 @@ export type ItemRef = {
 };
 
 export type TableItem = {
-  [key in string]: ItemRef | unknown;
+  [key in string]: ItemRef | Primitive | undefined;
 };
 
 export type CellItemProps = {

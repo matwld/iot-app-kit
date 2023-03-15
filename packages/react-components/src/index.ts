@@ -18,5 +18,5 @@ export {
 export { useViewport } from './hooks/useViewport';
 export { TimeSync } from './components/time-sync';
 
-export { Table } from './components/table';
+export { Table, isTableItemRef } from './components/table';
 export type { TableColumnDefinition, TableItem } from './components/table';
