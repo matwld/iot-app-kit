@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "AWS IoT SiteWise source for IoT Application Kit",
   "homepage": "https://github.com/awslabs/iot-app-kit#readme",
   "license": "Apache-2.0",
@@ -34,16 +34,17 @@
     }
   },
   "scripts": {
-    "build": "npm run clean && npm run build:cjs && npm run build:es",
-    "build:cjs": "tsc --outDir dist/cjs --module CommonJS",
-    "build:es": "tsc --outDir dist/es",
+    "build": "npm run clean && npm run build:es && npm run build:cjs",
+    "build:es": "tsc -p ./tsconfig.build.json --outDir ./dist/es",
+    "build:cjs": "tsc -p ./tsconfig.build.json --outDir ./dist/cjs --module CommonJS",
     "clean": "rm -rf dist",
     "dev": "npm-watch build",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "fix": "eslint --fix .",
-    "test": "TZ=UTC jest",
+    "test": "npm run test:jest && npm run test:types",
+    "test:jest": "TZ=UTC jest",
+    "test:types": "tsc --noEmit",
     "test.watch": "TZ=UTC jest --watchAll",
-    "test:typescript": "tsc --noEmit",
     "copy:license": "cp ../../LICENSE LICENSE",
     "copy:notice": "cp ../../NOTICE NOTICE",
     "prepack": "npm run copy:license && npm run copy:notice",
@@ -52,7 +53,7 @@
   "dependencies": {
     "@aws-sdk/client-iot-events": "^3.118.1",
     "@aws-sdk/client-iotsitewise": "^3.87.0",
-    "@iot-app-kit/core": "3.0.0",
+    "@iot-app-kit/core": "4.0.0",
     "@synchro-charts/core": "7.2.0",
     "dataloader": "^2.2.2",
     "lodash.isequal": "^4.5.0",
