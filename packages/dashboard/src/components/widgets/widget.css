@@ -3,13 +3,19 @@
 .widget {
   position: absolute;
   height: 100%;
+  overflow: hidden;
   user-select: none;
   box-sizing: border-box;
-  border: var(--selection-border-width) solid var(--selection-bg-color);
 }
 
-.widget:hover {
+.widget-editable {
+  /* Keeps widget in line with widget when selected */
+  padding: var(--selection-border-width);
+}
+
+.widget-editable:hover {
   border: var(--selection-border-width) solid var(--selection-color-secondary);
+  padding: 0; /* removes padding that was present to keep aligned when border is added on hover */
   cursor: all-scroll;
   border-radius: var(--selection-radius-small);
 }
@@ -22,7 +28,7 @@
   cursor: default;
 }
 
-.widget-selected {
+.widget-editable.widget-selected {
   border: var(--selection-border-width) solid var(--selection-color-secondary);
   border-radius: var(--selection-radius);
 }

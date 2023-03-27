@@ -1,208 +1,89 @@
 import * as React from 'react';
-import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
-
-import { act } from '@testing-library/react';
-
-import wrapper from '@cloudscape-design/components/test-utils/dom';
-
-import noop from 'lodash/noop';
+import { render, fireEvent, screen } from '@testing-library/react';
 
 import InternalDashboard from './index';
 import { configureDashboardStore } from '~/store';
-import { DefaultDashboardMessages } from '~/messages';
+import { DashboardConfiguration } from '~/types';
 
-describe('InternalDashboard', () => {
-  it('should render', function () {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
+const EMPTY_DASHBOARD: DashboardConfiguration = {
+  widgets: [],
+  viewport: { duration: '5m' },
+};
 
-    const args = {
-      dashboardConfiguration: {
-        widgets: [],
-        viewport: { duration: '5m' },
-      },
-    };
+it('saves when the save button is pressed with default grid settings provided', function () {
+  const onSave = jest.fn().mockImplementation(() => Promise.resolve());
 
-    const root = createRoot(container);
+  render(
+    <Provider store={configureDashboardStore({ dashboardConfiguration: EMPTY_DASHBOARD })}>
+      <DndProvider
+        backend={TouchBackend}
+        options={{
+          enableMouseEvents: true,
+          enableKeyboardEvents: true,
+        }}
+      >
+        <InternalDashboard onSave={onSave} />
+      </DndProvider>
+    </Provider>
+  );
 
-    act(() => {
-      root.render(
-        <Provider store={configureDashboardStore(args)}>
-          <DndProvider
-            backend={TouchBackend}
-            options={{
-              enableMouseEvents: true,
-              enableKeyboardEvents: true,
-            }}
-          >
-            <InternalDashboard hasEditPermission={true} messageOverrides={DefaultDashboardMessages} />
-          </DndProvider>
-        </Provider>
-      );
-    });
-    const dashboard = container.querySelector('.iot-dashboard');
-    expect(dashboard).toBeTruthy();
-  });
+  fireEvent.click(screen.getByRole('button', { name: /save/i }));
 
-  it('should be saveable', function () {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
+  expect(onSave).toBeCalledWith(EMPTY_DASHBOARD);
+});
 
-    const args = {
-      grid: {
-        width: 100,
-        height: 100,
-        cellSize: 10,
-        stretchToFit: false,
-      },
-      dashboardConfiguration: {
-        widgets: [],
-        viewport: { duration: '5m' },
-      },
-    };
-    const onSave = jest.fn(noop);
+it('renders preview mode', function () {
+  const args = {
+    readOnly: true,
+    dashboardConfiguration: EMPTY_DASHBOARD,
+  };
+  render(
+    <Provider store={configureDashboardStore(args)}>
+      <DndProvider
+        backend={TouchBackend}
+        options={{
+          enableMouseEvents: true,
+          enableKeyboardEvents: true,
+        }}
+      >
+        <InternalDashboard />
+      </DndProvider>
+    </Provider>
+  );
 
-    const root = createRoot(container);
+  expect(screen.queryByText(/time machine/i)).toBeInTheDocument();
+  expect(screen.queryByText(/actions/i)).toBeInTheDocument();
+  expect(screen.queryByText(/component library/i)).not.toBeInTheDocument();
+});
 
-    act(() => {
-      root.render(
-        <Provider store={configureDashboardStore(args)}>
-          <DndProvider
-            backend={TouchBackend}
-            options={{
-              enableMouseEvents: true,
-              enableKeyboardEvents: true,
-            }}
-          >
-            <InternalDashboard hasEditPermission={true} messageOverrides={DefaultDashboardMessages} onSave={onSave} />
-          </DndProvider>
-        </Provider>
-      );
-    });
-    const actionsContainer = container.querySelector('.actions');
-    expect(actionsContainer).toBeTruthy();
+it('toggles to preview mode and hides the component library', function () {
+  const args = {
+    readOnly: false,
+    dashboardConfiguration: EMPTY_DASHBOARD,
+  };
 
-    act(() => {
-      if (!actionsContainer) throw new Error('No actions on dashboard');
-      wrapper(actionsContainer).findButton('[data-test-id="actions-save-dashboard-btn"]')?.click();
-    });
+  render(
+    <Provider store={configureDashboardStore(args)}>
+      <DndProvider
+        backend={TouchBackend}
+        options={{
+          enableMouseEvents: true,
+          enableKeyboardEvents: true,
+        }}
+      >
+        <InternalDashboard onSave={() => Promise.resolve()} />
+      </DndProvider>
+    </Provider>
+  );
 
-    expect(onSave).toBeCalledWith(args);
-  });
+  expect(screen.queryByText(/component library/i)).toBeInTheDocument();
 
-  it('can display in readonly mode', function () {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
+  fireEvent.click(screen.getByRole('button', { name: /preview/i }));
 
-    const args = {
-      readOnly: true,
-      dashboardConfiguration: {
-        widgets: [],
-        viewport: { duration: '5m' },
-      },
-    };
-
-    const root = createRoot(container);
-
-    act(() => {
-      root.render(
-        <Provider store={configureDashboardStore(args)}>
-          <DndProvider
-            backend={TouchBackend}
-            options={{
-              enableMouseEvents: true,
-              enableKeyboardEvents: true,
-            }}
-          >
-            <InternalDashboard hasEditPermission={true} messageOverrides={DefaultDashboardMessages} />
-          </DndProvider>
-        </Provider>
-      );
-    });
-
-    expect(container.querySelector('.viewport-selection')).toBeTruthy();
-    expect(container.querySelector('.iot-dashboard-panes-area')).toBeFalsy();
-  });
-
-  it('can toggle to readonly mode', function () {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-
-    const args = {
-      readOnly: false,
-      dashboardConfiguration: {
-        widgets: [],
-        viewport: { duration: '5m' },
-      },
-    };
-
-    const root = createRoot(container);
-
-    act(() => {
-      root.render(
-        <Provider store={configureDashboardStore(args)}>
-          <DndProvider
-            backend={TouchBackend}
-            options={{
-              enableMouseEvents: true,
-              enableKeyboardEvents: true,
-            }}
-          >
-            <InternalDashboard hasEditPermission={true} messageOverrides={DefaultDashboardMessages} />
-          </DndProvider>
-        </Provider>
-      );
-    });
-
-    const actionsContainer = container.querySelector('.button-actions');
-    expect(actionsContainer).toBeTruthy();
-
-    act(() => {
-      if (!actionsContainer) throw new Error('No actions on dashboard');
-      const foundButton = wrapper(actionsContainer).findButton('[data-test-id="actions-toggle-read-only-btn"]');
-      foundButton?.click();
-    });
-
-    const dashboard = container.querySelector('.iot-dashboard-panes-area');
-    expect(dashboard).toBeFalsy();
-  });
-
-  it('cannot toggle to edit mode if no edit permissions', function () {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-
-    const args = {
-      readOnly: true,
-      dashboardConfiguration: {
-        widgets: [],
-        viewport: { duration: '5m' },
-      },
-    };
-    const root = createRoot(container);
-
-    act(() => {
-      root.render(
-        <Provider store={configureDashboardStore(args)}>
-          <DndProvider
-            backend={TouchBackend}
-            options={{
-              enableMouseEvents: true,
-              enableKeyboardEvents: true,
-            }}
-          >
-            <InternalDashboard hasEditPermission={false} messageOverrides={DefaultDashboardMessages} />
-          </DndProvider>
-        </Provider>
-      );
-    });
-
-    const actionsContainer = container.querySelector('.button-actions');
-    expect(actionsContainer).toBeFalsy();
-
-    const dashboard = container.querySelector('.iot-dashboard-panes-area');
-    expect(dashboard).toBeFalsy();
-  });
+  expect(screen.queryByText(/time machine/i)).toBeInTheDocument();
+  expect(screen.queryByText(/actions/i)).toBeInTheDocument();
+  expect(screen.queryByText(/component library/i)).not.toBeInTheDocument();
 });
