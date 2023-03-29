@@ -7,18 +7,21 @@ import { createComponentTypeIfNotExists, waitForComponentTypeActive } from '../l
 import { importScene } from '../lib/scene';
 import { importResource } from '../lib/resource';
 import { syncEntitiesFunction } from '../lib/sync';
-import { tmdk_config_file } from './init';
+import { tmdt_config_file } from './init';
 import * as path from 'path';
 import { verifyWorkspaceExists } from '../lib/utils';
+import { prompt } from 'prompts';
+import { syncSiteWisePropertyValues } from '../lib/property-values';
 
 export type Options = {
   region: string;
   'workspace-id': string;
   dir: string;
+  'upload-sitewise': boolean;
 };
 
 export const command = 'deploy';
-export const desc = 'Deploys a tmdk application';
+export const desc = 'Deploys a tmdt application';
 
 export const builder: CommandBuilder<Options> = (yargs) =>
   yargs.options({
@@ -35,7 +38,13 @@ export const builder: CommandBuilder<Options> = (yargs) =>
     dir: {
       type: 'string',
       require: true,
-      description: 'Specify the project location, directory for tmdk.json file',
+      description: 'Specify the project location, directory for tmdt.json file.',
+    },
+    'upload-sitewise': {
+      type: 'boolean',
+      require: false,
+      default: false,
+      description: 'Optionally upload all sitewise property value data stored in the tmdt project.',
     },
   });
 
@@ -43,19 +52,35 @@ export const handler = async (argv: Arguments<Options>) => {
   const workspaceId: string = argv['workspace-id']; // TODO allow it to be optional (i.e. option to autogenerate workspace for them)
   const region: string = argv.region;
   const dir: string = argv.dir;
+  let uploadSitewise: boolean = argv['upload-sitewise'];
   console.log(`Deploying project from directory ${dir} into workspace ${workspaceId} in ${region}`);
 
   initDefaultAwsClients({ region: region });
-  if (!fs.existsSync(path.join(dir, 'tmdk.json'))) {
-    throw new Error('TDMK.json does not exist. Please run tmdk init first.');
+  if (!fs.existsSync(path.join(dir, 'tmdt.json'))) {
+    throw new Error('TDMK.json does not exist. Please run tmdt init first.');
   }
-  // read tmdk json file
-  const tmdk_config_buffer = fs.readFileSync(path.join(dir, 'tmdk.json'), 'utf-8'); // TODO encodings
-  const tmdk_config: tmdk_config_file = JSON.parse(tmdk_config_buffer);
-  console.log('========= tmdk.json =========');
-  console.log(tmdk_config);
+  // read tmdt json file
+  const tmdt_config_buffer = fs.readFileSync(path.join(dir, 'tmdt.json'), 'utf-8'); // TODO encodings
+  const tmdt_config: tmdt_config_file = JSON.parse(tmdt_config_buffer);
+  console.log('========= tmdt.json =========');
+  console.log(tmdt_config);
 
   await verifyWorkspaceExists(workspaceId);
+
+  // TODO global variable for file/folder names
+  if (uploadSitewise && fs.existsSync(path.join(dir, 'property_values'))) {
+    // ask user to confirm data transfer
+    // TODO print amount of data to be uploaded?
+    await (async () => {
+      const response = await prompt({
+        type: 'text',
+        name: 'confirmation',
+        message: `Are you sure you wish to upload all SiteWise property value data in tmdt project [${dir}] ? (Y/n)`,
+      });
+
+      uploadSitewise = response.confirmation === 'Y';
+    })();
+  }
 
   // get workspace bucket
   let workspaceContentBucket = '';
@@ -75,19 +100,21 @@ export const handler = async (argv: Arguments<Options>) => {
   let stillComponentRemaining = true; // FIXME cleaner dependency creation process
   while (stillComponentRemaining) {
     stillComponentRemaining = false;
-    for (const componentTypeFile of tmdk_config['component_types']) {
+    for (const componentTypeFile of tmdt_config['component_types']) {
       const componentTypeDefinitionStr = fs.readFileSync(path.join(dir, componentTypeFile), 'utf-8');
       const componentTypeDefinition = JSON.parse(componentTypeDefinitionStr);
       // remove inherited properties
       const propertyDefinitions = componentTypeDefinition['propertyDefinitions'] as object;
       if (propertyDefinitions != undefined) {
-        const filtered_property_definitions = Object.entries(propertyDefinitions).reduce((acc, [key, value]) => {
-          if (!value['isInherited']) {
-            acc[key] = value;
-          }
-          return acc;
-        }, {} as { [key: string]: object });
-        componentTypeDefinition['propertyDefinitions'] = filtered_property_definitions;
+        componentTypeDefinition['propertyDefinitions'] = Object.entries(propertyDefinitions).reduce(
+          (acc, [key, value]) => {
+            if (!value['isInherited']) {
+              acc[key] = value;
+            }
+            return acc;
+          },
+          {} as { [key: string]: object }
+        );
       }
       // create component type if not exists
       try {
@@ -113,7 +140,7 @@ export const handler = async (argv: Arguments<Options>) => {
 
   // import scenes
   console.log('======== Scene Files ========');
-  for (const sceneFile of tmdk_config['scenes']) {
+  for (const sceneFile of tmdt_config['scenes']) {
     console.log(`Importing scene: ${sceneFile} ...`);
     try {
       await importScene(workspaceId, path.join(dir, sceneFile), workspaceContentBucket);
@@ -128,16 +155,22 @@ export const handler = async (argv: Arguments<Options>) => {
 
   // import model files
   console.log('======== Model Files ========');
-  for (const modelFile of tmdk_config['models']) {
+  for (const modelFile of tmdt_config['models']) {
     console.log(`Importing model: ${modelFile} ...`);
     await importResource(workspaceId, path.join(dir, '3d_models', modelFile), modelFile);
   }
 
   // import entities
   console.log('========== Entities =========');
-  const entityFileName = tmdk_config['entities'];
+  const entityFileName = tmdt_config['entities'];
   const entityFileJson = JSON.parse(fs.readFileSync(path.join(dir, entityFileName), 'utf-8'));
   await syncEntitiesFunction(workspaceId, entityFileJson);
+
+  // optionally upload sitewise property values
+  if (uploadSitewise) {
+    console.log('====== SiteWise Property Values =====');
+    await syncSiteWisePropertyValues(workspaceId, path.join(dir, 'property_values'), entityFileJson);
+  }
 
   console.log('=== Deployment Completed! ===');
   return 0;
