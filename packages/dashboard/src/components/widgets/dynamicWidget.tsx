@@ -3,7 +3,7 @@ import { WidgetComponentMap } from '~/customization/widgetComponentMap';
 import type { FC } from 'react';
 
 import './dynamicWidget.css';
-import type { Widget } from '~/types';
+import type { DashboardWidget } from '~/types';
 import type { WidgetsMessages } from '~/messages';
 
 const IconX: FC = () => (
@@ -11,6 +11,7 @@ const IconX: FC = () => (
     aria-hidden='true'
     data-prefix='far'
     data-icon='times-circle'
+    pointerEvents='none'
     className='svg-inline--fa fa-times-circle fa-w-16'
     xmlns='http://www.w3.org/2000/svg'
     viewBox='0 0 512 512'
@@ -21,7 +22,7 @@ const IconX: FC = () => (
 );
 
 export type DynamicWidgetProps = {
-  widget: Widget;
+  widget: DashboardWidget;
   widgetsMessages: WidgetsMessages;
 };
 
@@ -29,7 +30,7 @@ export const getDragLayerProps = ({
   widget,
   widgetsMessages,
 }: {
-  widget: Widget;
+  widget: DashboardWidget;
   widgetsMessages: WidgetsMessages;
 }): DynamicWidgetProps => ({
   widget,

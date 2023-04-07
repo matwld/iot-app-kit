@@ -1,12 +1,14 @@
 import React, { useCallback, useContext, useMemo } from 'react';
-import { defineMessages, useIntl } from 'react-intl';
+import { defineMessages, MessageDescriptor, useIntl } from 'react-intl';
 import * as THREE from 'three';
+import { IconProps } from '@awsui/components-react';
 
 import { DEFAULT_LIGHT_SETTINGS_MAP } from '../../../../common/constants';
 import {
   COMPOSER_FEATURES,
   IAnchorComponent,
   ICameraComponent,
+  IDataOverlayComponent,
   ILightComponent,
   IModelRefComponent,
   IMotionIndicatorComponent,
@@ -33,13 +35,14 @@ enum ObjectTypes {
   MotionIndicator = 'add-object-motion-indicator',
   Light = 'add-object-light',
   ViewCamera = 'add-object-view-camera',
+  Annotation = 'add-object-annotation',
 }
 
 type AddObjectMenuItem = ToolbarItemOptions & {
   uuid: ObjectTypes;
 };
 
-const labelStrings = defineMessages({
+const labelStrings: { [key in ObjectTypes]: MessageDescriptor } = defineMessages({
   [ObjectTypes.Object]: { defaultMessage: 'Add object', description: 'Menu Item label' },
   [ObjectTypes.Tag]: { defaultMessage: 'Tag', description: 'Menu Item label' },
   [ObjectTypes.Empty]: { defaultMessage: 'Empty node', description: 'Menu Item label' },
@@ -49,6 +52,7 @@ const labelStrings = defineMessages({
   [ObjectTypes.ModelShader]: { defaultMessage: 'Model shader', description: 'Menu Item label' },
   [ObjectTypes.MotionIndicator]: { defaultMessage: 'Motion indicator', description: 'Menu Item label' },
   [ObjectTypes.ViewCamera]: { defaultMessage: 'Camera', description: 'Menu Item label' },
+  [ObjectTypes.Annotation]: { defaultMessage: 'Annotation', description: 'Menu Item label' },
 });
 
 const textStrings = defineMessages({
@@ -60,7 +64,12 @@ const textStrings = defineMessages({
   [ObjectTypes.ModelShader]: { defaultMessage: 'Add model shader', description: 'Menu Item' },
   [ObjectTypes.MotionIndicator]: { defaultMessage: 'Add motion indicator', description: 'Menu Item' },
   [ObjectTypes.ViewCamera]: { defaultMessage: 'Add camera from current view', description: 'Menu Item' },
+  [ObjectTypes.Annotation]: { defaultMessage: 'Add annotation', description: 'Menu Item' },
 });
+
+type ToolbarItemOptionRaw = Omit<ToolbarItemOptions, 'label' | 'text' | 'subItems'> & {
+  subItems?: ToolbarItemOptionRaw[];
+};
 
 export const AddObjectMenu = () => {
   const sceneComposerId = useContext(sceneComposerIdContext);
@@ -90,47 +99,62 @@ export const AddObjectMenu = () => {
     );
   }, [nodeMap]);
 
-  const addObjectMenuItems = [
-    {
-      icon: { name: 'add-plus' },
-      uuid: ObjectTypes.Object,
-    },
-    {
-      uuid: ObjectTypes.Empty,
-    },
-    {
-      uuid: ObjectTypes.Model,
-      isDisabled: !showAssetBrowserCallback,
-    },
-    {
-      uuid: ObjectTypes.EnvironmentModel,
-      isDisabled: !showAssetBrowserCallback || sceneContainsEnvironmentModel,
-      feature: { name: COMPOSER_FEATURES.EnvironmentModel },
-    },
-    {
-      uuid: ObjectTypes.Light,
-    },
-    {
-      uuid: ObjectTypes.ViewCamera,
-      feature: { name: COMPOSER_FEATURES.CameraView },
-    },
-    {
-      uuid: ObjectTypes.Tag,
-    },
-    {
-      uuid: ObjectTypes.ModelShader,
-      isDisabled: !selectedSceneNodeRef || isEnvironmentNode(selectedSceneNode),
-    },
-    {
-      uuid: ObjectTypes.MotionIndicator,
-    },
-  ].map(
-    (item) =>
-      ({
+  const mapToMenuItem = useCallback(
+    (item: ToolbarItemOptionRaw): AddObjectMenuItem => {
+      const typeId: ObjectTypes = item.uuid as ObjectTypes;
+      return {
         ...item,
-        label: labelStrings[item.uuid] ? formatMessage(labelStrings[item.uuid]) : undefined, // If there's a label string, show label
-        text: textStrings[item.uuid] ? formatMessage(textStrings[item.uuid]) : undefined, // if there's a text string, show text
-      } as AddObjectMenuItem),
+        uuid: typeId,
+        subItems: item.subItems?.map(mapToMenuItem),
+        label: formatMessage(labelStrings[typeId]),
+        text: textStrings[typeId] ? formatMessage(textStrings[typeId]) : undefined, // if there's a text string, show text
+      };
+    },
+    [formatMessage],
+  );
+
+  const addObjectMenuItems = useMemo(
+    () =>
+      [
+        {
+          icon: { name: 'add-plus' as IconProps.Name },
+          uuid: ObjectTypes.Object,
+        },
+        {
+          uuid: ObjectTypes.Empty,
+        },
+        {
+          uuid: ObjectTypes.Model,
+          isDisabled: !showAssetBrowserCallback,
+        },
+        {
+          uuid: ObjectTypes.EnvironmentModel,
+          isDisabled: !showAssetBrowserCallback || sceneContainsEnvironmentModel,
+          feature: { name: COMPOSER_FEATURES.EnvironmentModel },
+        },
+        {
+          uuid: ObjectTypes.Light,
+        },
+        {
+          uuid: ObjectTypes.ViewCamera,
+          feature: { name: COMPOSER_FEATURES.CameraView },
+        },
+        {
+          uuid: ObjectTypes.Tag,
+        },
+        {
+          uuid: ObjectTypes.Annotation,
+          feature: { name: COMPOSER_FEATURES.Overlay },
+        },
+        {
+          uuid: ObjectTypes.ModelShader,
+          isDisabled: !selectedSceneNodeRef || isEnvironmentNode(selectedSceneNode),
+        },
+        {
+          uuid: ObjectTypes.MotionIndicator,
+        },
+      ].map(mapToMenuItem),
+    [showAssetBrowserCallback, sceneContainsEnvironmentModel, selectedSceneNodeRef, isEnvironmentNode],
   );
 
   const getRefForParenting = useCallback(() => {
@@ -287,6 +311,35 @@ export const AddObjectMenu = () => {
     }
   };
 
+  const handleAddOverlay = useCallback(
+    (subType: Component.DataOverlaySubType) => {
+      const component: IDataOverlayComponent = {
+        type: KnownComponentType.DataOverlay,
+        subType,
+        valueDataBindings: [],
+        dataRows: [
+          {
+            rowType: Component.DataOverlayRowType.Markdown,
+            content: '',
+          },
+        ],
+      };
+
+      const node = {
+        name: subType === Component.DataOverlaySubType.OverlayPanel ? 'DataOverlay' : 'Annotation',
+        components: [component],
+        parentRef: getRefForParenting(),
+      } as unknown as ISceneNodeInternal;
+
+      if (enhancedEditingEnabled) {
+        setAddingWidget({ type: KnownComponentType.DataOverlay, node });
+      } else {
+        appendSceneNode(node);
+      }
+    },
+    [getRefForParenting, enhancedEditingEnabled, setAddingWidget, appendSceneNode],
+  );
+
   return (
     <ToolbarItem
       items={addObjectMenuItems}
@@ -316,6 +369,9 @@ export const AddObjectMenu = () => {
             break;
           case ObjectTypes.ViewCamera:
             handleAddViewCamera();
+            break;
+          case ObjectTypes.Annotation:
+            handleAddOverlay(Component.DataOverlaySubType.TextAnnotation);
             break;
         }
 

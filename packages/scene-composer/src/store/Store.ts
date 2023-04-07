@@ -21,6 +21,7 @@ import {
   isISceneComponentInternal,
   isISceneNodeInternal,
   IMotionIndicatorComponentInternal,
+  IDataOverlayComponentInternal,
 } from './internalInterfaces';
 
 export type {
@@ -36,6 +37,7 @@ export type {
   ILightComponentInternal,
   IColorOverlayComponentInternal,
   IMotionIndicatorComponentInternal,
+  IDataOverlayComponentInternal,
 };
 
 export interface ISharedState {
@@ -56,11 +58,11 @@ export type RootState = ISharedState &
  */
 const stateCreator: StateCreator<RootState> = (set, get, api) => ({
   lastOperation: undefined,
-  ...createSceneDocumentSlice(set, get, api),
+  ...createSceneDocumentSlice(set, get),
   ...createEditStateSlice(set, get, api),
   ...createDataStoreSlice(set, get, api),
   noHistoryStates: {
-    ...createViewOptionStateSlice(set, get, api),
+    ...createViewOptionStateSlice(set),
   },
   ...createNodeErrorStateSlice(set, get, api),
 });
@@ -133,23 +135,26 @@ const editorStateSelector = (state: RootState) => ({
   setMainCameraObject: state.setMainCameraObject,
 });
 
-const dataStoreSelector = (state: RootState) => ({
+const dataStoreSelector = (state: RootState): IDataStoreSlice => ({
   dataBindingTemplate: state.dataBindingTemplate,
   dataInput: state.dataInput,
   setDataInput: state.setDataInput,
+  setDataBindingTemplate: state.setDataBindingTemplate,
 });
 
-const nodeErrorStateSelector = (state: RootState) => ({
+const nodeErrorStateSelector = (state: RootState): INodeErrorStateSlice => ({
   nodeErrorMap: state.nodeErrorMap,
   addNodeError: state.addNodeError,
   removeNodeError: state.removeNodeError,
 });
 
-const viewOptionStateSelector = (state: RootState) => ({
-  motionIndicatorVisible: state.noHistoryStates.motionIndicatorVisible,
-  toggleMotionIndicatorVisibility: state.noHistoryStates.toggleMotionIndicatorVisibility,
+const viewOptionStateSelector = (state: RootState): IViewOptionStateSlice => ({
+  componentVisibilities: state.noHistoryStates.componentVisibilities,
+  toggleComponentVisibility: state.noHistoryStates.toggleComponentVisibility,
   tagSettings: state.noHistoryStates.tagSettings,
   setTagSettings: state.noHistoryStates.setTagSettings,
+  enableMatterportViewer: state.noHistoryStates.enableMatterportViewer,
+  setMatterportViewerEnabled: state.noHistoryStates.setMatterportViewerEnabled,
 });
 
 /**
@@ -165,15 +170,15 @@ const useEditorState = (id: string) => {
   return useStore(id)(editorStateSelector, shallow);
 };
 
-const useDataStore = (id: string) => {
+const useDataStore = (id: string): IDataStoreSlice => {
   return useStore(id)(dataStoreSelector, shallow);
 };
 
-const useNodeErrorState = (id: string) => {
+const useNodeErrorState = (id: string): INodeErrorStateSlice => {
   return useStore(id)(nodeErrorStateSelector, shallow);
 };
 
-const useViewOptionState = (id: string) => {
+const useViewOptionState = (id: string): IViewOptionStateSlice => {
   return useStore(id)(viewOptionStateSelector, shallow);
 };
 

@@ -1,11 +1,11 @@
 import { debounce } from 'lodash';
 import * as THREE from 'three';
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
-import { Checkbox, FormField, TextContent } from '@awsui/components-react';
+import { Box, Checkbox, FormField, TextContent } from '@awsui/components-react';
 
 import useLifecycleLogging from '../../logger/react-logger/hooks/useLifecycleLogging';
-import { COMPOSER_FEATURES, KnownComponentType } from '../../interfaces';
+import { COMPOSER_FEATURES, IDataOverlayComponent, KnownComponentType } from '../../interfaces';
 import { RecursivePartial } from '../../utils/typeUtils';
 import { ISceneNodeInternal, useEditorState, useSceneDocument } from '../../store';
 import { sceneComposerIdContext } from '../../common/sceneComposerIdContext';
@@ -15,10 +15,13 @@ import { isLinearPlaneMotionIndicator } from '../../utils/sceneComponentUtils';
 import LogProvider from '../../logger/react-logger/log-provider';
 import { findComponentByType, isEnvironmentNode } from '../../utils/nodeUtils';
 import { getGlobalSettings } from '../../common/GlobalSettings';
+import { Component } from '../../models/SceneModels';
+import { Divider } from '../Divider';
 
 import { ComponentEditor } from './ComponentEditor';
 import { ExpandableInfoSection, Matrix3XInputGrid, Triplet, TextInput } from './CommonPanelComponents';
 import DebugInfoPanel from './scene-components/debug/DebugPanel';
+import { AddOrRemoveOverlayButton } from './AddOrRemoveOverlayButton';
 
 export const SceneNodeInspectorPanel: React.FC = () => {
   const log = useLifecycleLogging('SceneNodeInspectorPanel');
@@ -29,6 +32,7 @@ export const SceneNodeInspectorPanel: React.FC = () => {
   const intl = useIntl();
 
   const subModelMovementEnabled = getGlobalSettings().featureConfig[COMPOSER_FEATURES.SubModelMovement];
+  const overlayEnabled = getGlobalSettings().featureConfig[COMPOSER_FEATURES.Overlay];
 
   const i18nKnownComponentTypesStrings = defineMessages({
     [KnownComponentType.ModelRef]: {
@@ -59,6 +63,14 @@ export const SceneNodeInspectorPanel: React.FC = () => {
       defaultMessage: 'Motion Indicator',
       description: 'Expandable Section title',
     },
+    [Component.DataOverlaySubType.TextAnnotation]: {
+      defaultMessage: 'Annotation',
+      description: 'Expandable Section title',
+    },
+    [Component.DataOverlaySubType.OverlayPanel]: {
+      defaultMessage: 'Overlay',
+      description: 'Expandable Section title',
+    },
   });
 
   log?.verbose('render inspect panel with selected scene node ', selectedSceneNodeRef, selectedSceneNode);
@@ -67,24 +79,11 @@ export const SceneNodeInspectorPanel: React.FC = () => {
     updateSceneNodeInternal(sceneNode.ref, { transform: { position } }, true);
   }, selectedSceneNode);
 
-  const isModelComponent = useMemo(() => {
-    return selectedSceneNode?.components.some((component) => component.type === KnownComponentType.ModelRef) === true;
-  }, [selectedSceneNode]);
-
-  const isCameraComponent = useMemo(
-    () => !!findComponentByType(selectedSceneNode, KnownComponentType.Camera),
-    [selectedSceneNode],
-  );
-
-  const isTagComponent = useMemo(
-    () => !!findComponentByType(selectedSceneNode, KnownComponentType.Tag),
-    [selectedSceneNode],
-  );
-
-  const isSubModelComponent = useMemo(
-    () => !!findComponentByType(selectedSceneNode, KnownComponentType.SubModelRef),
-    [selectedSceneNode],
-  );
+  const isModelComponent = !!findComponentByType(selectedSceneNode, KnownComponentType.ModelRef);
+  const isCameraComponent = !!findComponentByType(selectedSceneNode, KnownComponentType.Camera);
+  const isTagComponent = !!findComponentByType(selectedSceneNode, KnownComponentType.Tag);
+  const isOverlayComponent = !!findComponentByType(selectedSceneNode, KnownComponentType.DataOverlay);
+  const isSubModelComponent = !!findComponentByType(selectedSceneNode, KnownComponentType.SubModelRef);
 
   const transformVisible = !isSubModelComponent || subModelMovementEnabled;
 
@@ -117,14 +116,47 @@ export const SceneNodeInspectorPanel: React.FC = () => {
   }
 
   const componentViews = selectedSceneNode.components.map((component, index) => {
+    const isTag = component.type === KnownComponentType.Tag;
     return (
-      <ExpandableInfoSection
-        withoutSpaceBetween
-        key={component.type + '_' + index}
-        title={intl.formatMessage(i18nKnownComponentTypesStrings[component.type]) || component.type}
-      >
-        <ComponentEditor node={selectedSceneNode} component={component} />
-      </ExpandableInfoSection>
+      <React.Fragment key={component.type + '_' + index}>
+        <ExpandableInfoSection
+          withoutSpaceBetween
+          key={component.type + '_' + index}
+          title={
+            (component.type === KnownComponentType.DataOverlay
+              ? intl.formatMessage(i18nKnownComponentTypesStrings[(component as IDataOverlayComponent).subType]) ||
+                (component as IDataOverlayComponent).subType
+              : intl.formatMessage(i18nKnownComponentTypesStrings[component.type])) || component.type
+          }
+        >
+          <ComponentEditor node={selectedSceneNode} component={component} />
+
+          {/* If the component is an overlay panel, add remove overlay button */}
+          {component.type === KnownComponentType.DataOverlay &&
+            (component as IDataOverlayComponent).subType === Component.DataOverlaySubType.OverlayPanel && (
+              <Box margin={{ top: 's' }}>
+                <Divider />
+                <AddOrRemoveOverlayButton />
+              </Box>
+            )}
+        </ExpandableInfoSection>
+
+        {/* If the component is a Tag and there is no overlay component in the selected node, then an empty
+          overlay sections is added. */}
+        {overlayEnabled && isTag && !isOverlayComponent && (
+          <ExpandableInfoSection
+            withoutSpaceBetween
+            key={KnownComponentType.DataOverlay + '_' + index}
+            title={intl.formatMessage(i18nKnownComponentTypesStrings[Component.DataOverlaySubType.OverlayPanel])}
+          >
+            {intl.formatMessage({
+              defaultMessage: 'Currently no overlay',
+              description: 'Expandable section content',
+            })}
+            <AddOrRemoveOverlayButton />
+          </ExpandableInfoSection>
+        )}
+      </React.Fragment>
     );
   });
 
@@ -164,6 +196,7 @@ export const SceneNodeInspectorPanel: React.FC = () => {
               values={selectedSceneNode.transform.rotation}
               toStr={(a) => THREE.MathUtils.radToDeg(a).toFixed(3)}
               fromStr={(s) => THREE.MathUtils.degToRad(toNumber(s))}
+              disabled={isTagComponent || isOverlayComponent ? [true, true, true] : [false, false, false]}
               readonly={readonly}
               onChange={debounce((items) => {
                 handleInputChanges({ transform: { rotation: items } });
@@ -174,7 +207,11 @@ export const SceneNodeInspectorPanel: React.FC = () => {
               <Matrix3XInputGrid
                 name={intl.formatMessage({ defaultMessage: 'Scale', description: 'Input Grid title name' })}
                 labels={['X', 'Y', 'Z']}
-                disabled={[false, isLinearPlaneMotionIndicator(selectedSceneNode), false]}
+                disabled={
+                  isTagComponent || isOverlayComponent
+                    ? [true, true, true]
+                    : [false, isLinearPlaneMotionIndicator(selectedSceneNode), false]
+                }
                 readonly={readonly}
                 values={selectedSceneNode.transform.scale}
                 toStr={(a) => a.toFixed(3)}

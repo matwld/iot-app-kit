@@ -1,4 +1,8 @@
 {
+  "+06qIR": {
+    "note": "Sub section label",
+    "text": "Tag"
+  },
   "+FW9s9": {
     "note": "signify No rule option to be selected in a drop down menu",
     "text": "No Rule"
@@ -10,6 +14,10 @@
   "+fx4Dg": {
     "note": "FormField label",
     "text": "Rule Id"
+  },
+  "/N+x/y": {
+    "note": "Expandable Section title",
+    "text": "Overlay"
   },
   "/OvfUw": {
     "note": "Distance Units in a dropdown menu",
@@ -27,6 +35,10 @@
     "note": "Menu Item",
     "text": "Rotate object"
   },
+  "07ZORc": {
+    "note": "Toggle label",
+    "text": "Always on"
+  },
   "0JZgMB": {
     "note": "Sub section label",
     "text": "Motion indicator"
@@ -34,6 +46,10 @@
   "0awbFz": {
     "note": "ExpandableInfoSection Title",
     "text": "Tag Settings"
+  },
+  "15KXQ/": {
+    "note": "Input error message",
+    "text": "Invalid name"
   },
   "1cVQu5": {
     "note": "label for an input component selecting number of arrows",
@@ -83,6 +99,10 @@
     "note": "Add parameter Button Text",
     "text": "Add parameter"
   },
+  "4YbINk": {
+    "note": "Expandable Section title",
+    "text": "Annotation"
+  },
   "5pV1+0": {
     "note": "Form field label",
     "text": "Ref"
@@ -106,6 +126,10 @@
   "6bw/XW": {
     "note": "Form Field label",
     "text": "Component Type Id"
+  },
+  "6gTEPn": {
+    "note": "Form Field label",
+    "text": "Connection Name"
   },
   "6y5r/N": {
     "note": "Menu Item",
@@ -167,6 +191,10 @@
     "note": "Status indicator label",
     "text": "Camera view saved"
   },
+  "AEkvpm": {
+    "note": "Input error message",
+    "text": "Invalid character in the name"
+  },
   "As6z+e": {
     "note": "ExpandableInfoSection Title",
     "text": "Current View Settings"
@@ -199,6 +227,14 @@
     "note": "Menu Item label",
     "text": "3D model"
   },
+  "DsNVlc": {
+    "note": "Input error message",
+    "text": "Duplicate name"
+  },
+  "EK6rUQ": {
+    "note": "Sub section label",
+    "text": "Visibility settings"
+  },
   "ENcryP": {
     "note": "Panel Tab title",
     "text": "Hierarchy"
@@ -219,9 +255,17 @@
     "note": "Panel Tab title",
     "text": "Inspector"
   },
+  "FOvFZQ": {
+    "note": "Sub section label",
+    "text": "Annotation"
+  },
   "FeC0Eo": {
     "note": "rule Id label",
     "text": "Rule Id"
+  },
+  "Fy5tAf": {
+    "note": "Sub-Section Header",
+    "text": "Matterport Integration"
   },
   "GRIkbq": {
     "note": "Menu Item label",
@@ -439,9 +483,17 @@
     "note": "option text of a Select component",
     "text": "Arrow with background"
   },
+  "W5mTpF": {
+    "note": "Button label",
+    "text": "Learn more"
+  },
   "WAYi01": {
     "note": "checkbox option",
     "text": "Snap to floor"
+  },
+  "WEMQNi": {
+    "note": "Menu Item label",
+    "text": "Annotation"
   },
   "WVVCRr": {
     "note": "Form Field label",
@@ -467,6 +519,10 @@
     "note": "checkbox option",
     "text": "Enable Shadow"
   },
+  "YGtqhG": {
+    "note": "button label",
+    "text": "Add overlay"
+  },
   "ZKJ6Ci": {
     "note": "Toolbar label",
     "text": "Delete"
@@ -482,6 +538,10 @@
   "a2V9FB": {
     "note": "FormField label",
     "text": "Define arrow speed"
+  },
+  "aUtGJh": {
+    "note": "button label",
+    "text": "Remove overlay"
   },
   "aX7AgI": {
     "note": "select box option text value",
@@ -511,6 +571,10 @@
     "note": "drop down menu label",
     "text": "Target"
   },
+  "dLVgDJ": {
+    "note": "Select a connection placeholder",
+    "text": "Select a connection"
+  },
   "dlo3Px": {
     "note": "Placeholder",
     "text": "Choose a color value"
@@ -535,9 +599,17 @@
     "note": "Select Color type option",
     "text": "Define background color"
   },
+  "eznlx7": {
+    "note": "Form Field label",
+    "text": "Matterport Model Id"
+  },
   "fD6Gup": {
     "note": "Form Field label",
     "text": "Decay"
+  },
+  "fLNO7R": {
+    "note": "FormField label",
+    "text": "Panel Config"
   },
   "fOCzxm": {
     "note": "Form Field label",
@@ -546,6 +618,10 @@
   "fOhk5w": {
     "note": "Menu Item",
     "text": "3D Pan"
+  },
+  "fWrngr": {
+    "note": "FormField label",
+    "text": "Markdown Content"
   },
   "fdMW6X": {
     "note": "FormField label",
@@ -595,6 +671,10 @@
     "note": "Form Field label",
     "text": "Shadow Settings"
   },
+  "jVpmNU": {
+    "note": "Sub section label",
+    "text": "Overlay"
+  },
   "jkdxk0": {
     "note": "Button text for color opacity percentage",
     "text": "Opacity : {opacityPercentage, number, percent}"
@@ -631,6 +711,10 @@
     "note": "Warning message",
     "text": "Warning"
   },
+  "lbVroy": {
+    "note": "checkbox option",
+    "text": "Open by default"
+  },
   "lbd69l": {
     "note": "Menu Item",
     "text": "Add light"
@@ -647,6 +731,10 @@
     "note": "Form section listing out properties about a 3D models materials and textures",
     "text": "Material Details"
   },
+  "nGEVE7": {
+    "note": "Desction label",
+    "text": "No Connections"
+  },
   "nGlTEq": {
     "note": "Form Field label",
     "text": "Arrow"
@@ -659,9 +747,17 @@
     "note": "select box option text value",
     "text": "Receive Shadow"
   },
+  "o3PtbU": {
+    "note": "Sub-Section Description",
+    "text": "Connecting your Matterport account enables viewing spaces in your TwinMaker scene."
+  },
   "oEXVJ5": {
     "note": "Motion Indicator Shape in a dropdown menu",
     "text": "Linear Plane"
+  },
+  "oQw+fr": {
+    "note": "Button text",
+    "text": "Add data binding"
   },
   "oiGDox": {
     "note": "Field label",
@@ -751,6 +847,10 @@
     "note": "Progress Bar description",
     "text": "{fileSize} downloaded"
   },
+  "ty9k3i": {
+    "note": "matterport tag sync button",
+    "text": "Sync Matterport Tags"
+  },
   "tz4SMZ": {
     "note": "Panel Tab title",
     "text": "Settings"
@@ -759,9 +859,17 @@
     "note": "Form section header",
     "text": "Lens"
   },
+  "ua6Icd": {
+    "note": "Menu Item",
+    "text": "Add annotation"
+  },
   "ubyV0D": {
     "note": "Remove parameter Button Text",
     "text": "Remove parameter"
+  },
+  "ugCkWy": {
+    "note": "Enter your Matterport model id placeholder",
+    "text": "Enter your Matterport model id"
   },
   "v+tpx1": {
     "note": "Menu Item label",
@@ -778,6 +886,10 @@
   "vMsay3": {
     "note": "Scene Resource types in a dropdown menu",
     "text": "Icon"
+  },
+  "vlWCF3": {
+    "note": "FormField label",
+    "text": "Binding Name"
   },
   "w4ByXF": {
     "note": "15mm lens",
@@ -799,6 +911,10 @@
     "note": "Menu Item",
     "text": "Add empty node"
   },
+  "yXdV0F": {
+    "note": "ExpandableInfoSection Title",
+    "text": "3rd Party Resources"
+  },
   "ylDLGq": {
     "note": "FormField label",
     "text": "Arrow color"
@@ -810,5 +926,9 @@
   "z4V95/": {
     "note": "Expandable Section title",
     "text": "Camera"
+  },
+  "zH7jyn": {
+    "note": "Expandable section content",
+    "text": "Currently no overlay"
   }
 }

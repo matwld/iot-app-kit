@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from 'react';
 import { useIntl, IntlShape } from 'react-intl';
 
 import { OrbitCameraSvg, PanCameraSvg } from '../../../../assets/svgs';
-import { CameraControlsType } from '../../../../interfaces';
+import { CameraControlsType, KnownSceneProperty } from '../../../../interfaces';
 import { sceneComposerIdContext } from '../../../../common/sceneComposerIdContext';
 import { useStore } from '../../../../store';
 import { ToolbarItem } from '../../common/ToolbarItem';
@@ -56,21 +56,34 @@ export function SceneItemGroup({ isViewing = false }: SceneItemGroupProps) {
   const sceneComposerId = useContext(sceneComposerIdContext);
   const cameraControlsType = useStore(sceneComposerId)((state) => state.cameraControlsType);
   const setCameraControlsType = useStore(sceneComposerId)((state) => state.setCameraControlsType);
+  const isMatterportEnabled = useStore(sceneComposerId)(
+    (state) =>
+      state.getSceneProperty(KnownSceneProperty.MatterportModelId) &&
+      state.getSceneProperty(KnownSceneProperty.MatterportModelId) !== '',
+  );
   const intl = useIntl();
 
   const initialSelectedItem = useMemo(() => {
     return cameraControlItems(intl).find((item) => item.mode === cameraControlsType) ?? cameraControlItemsOptions[0];
   }, [cameraControlItems, cameraControlsType]);
 
+  const items = useMemo(() => {
+    const rawItems = cameraControlItems(intl);
+    rawItems.forEach((item) => (item.isSelected = item.mode === cameraControlsType));
+    return rawItems;
+  }, [cameraControlsType]);
+
   return (
     <ToolbarItemGroup>
       {!isViewing && <AddObjectMenu />}
-      <ToolbarItem
-        items={cameraControlItems(intl)}
-        initialSelectedItem={initialSelectedItem}
-        type='mode-select'
-        onClick={(selectedItem) => setCameraControlsType(selectedItem.mode)}
-      />
+      {!isMatterportEnabled && (
+        <ToolbarItem
+          items={items}
+          initialSelectedItem={initialSelectedItem}
+          type='mode-select'
+          onClick={(selectedItem) => setCameraControlsType(selectedItem.mode)}
+        />
+      )}
     </ToolbarItemGroup>
   );
 }

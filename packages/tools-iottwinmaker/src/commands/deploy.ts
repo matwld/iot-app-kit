@@ -1,6 +1,12 @@
 import type { Arguments, CommandBuilder } from 'yargs';
-
-import { ConflictException, GetWorkspaceCommandOutput, ValidationException } from '@aws-sdk/client-iottwinmaker';
+import {
+  ConflictException,
+  FunctionResponse,
+  GetWorkspaceCommandOutput,
+  PropertyDefinitionResponse,
+  ResourceNotFoundException,
+  ValidationException,
+} from '@aws-sdk/client-iottwinmaker';
 import { getDefaultAwsClients as aws, initDefaultAwsClients } from '../lib/aws-clients';
 import * as fs from 'fs';
 import { createComponentTypeIfNotExists, waitForComponentTypeActive } from '../lib/component-type';
@@ -12,6 +18,7 @@ import * as path from 'path';
 import { verifyWorkspaceExists } from '../lib/utils';
 import { prompt } from 'prompts';
 import { syncSiteWisePropertyValues } from '../lib/property-values';
+import { createWorkspaceIfNotExists } from '../lib/workspace';
 
 export type Options = {
   region: string;
@@ -65,7 +72,26 @@ export const handler = async (argv: Arguments<Options>) => {
   console.log('========= tmdt.json =========');
   console.log(tmdt_config);
 
-  await verifyWorkspaceExists(workspaceId);
+  try {
+    await verifyWorkspaceExists(workspaceId);
+  } catch (e) {
+    if (e instanceof ResourceNotFoundException) {
+      const response = await prompt({
+        type: 'text',
+        name: 'confirmation',
+        message: `Workspace [${workspaceId}] in region [${region}] not found. Would you like to automatically create a workspace with name [${workspaceId}], S3 bucket, and
+        workspace role to continue deployment (Y)? Press any other key to abort (n).`,
+      });
+      if (response.confirmation === 'Y') {
+        await createWorkspaceIfNotExists(workspaceId);
+      } else {
+        console.log('Aborting deployment...');
+        return 0;
+      }
+    } else {
+      throw e;
+    }
+  }
 
   // TODO global variable for file/folder names
   if (uploadSitewise && fs.existsSync(path.join(dir, 'property_values'))) {
@@ -104,17 +130,31 @@ export const handler = async (argv: Arguments<Options>) => {
       const componentTypeDefinitionStr = fs.readFileSync(path.join(dir, componentTypeFile), 'utf-8');
       const componentTypeDefinition = JSON.parse(componentTypeDefinitionStr);
       // remove inherited properties
-      const propertyDefinitions = componentTypeDefinition['propertyDefinitions'] as object;
+      const propertyDefinitions: Record<string, PropertyDefinitionResponse> =
+        componentTypeDefinition['propertyDefinitions'];
       if (propertyDefinitions != undefined) {
         componentTypeDefinition['propertyDefinitions'] = Object.entries(propertyDefinitions).reduce(
           (acc, [key, value]) => {
             if (!value['isInherited']) {
               acc[key] = value;
-            }
+            } else if ('defaultValue' in value) {
+            acc[key] = { defaultValue: value['defaultValue'] };
+          }
             return acc;
           },
           {} as { [key: string]: object }
         );
+      }
+      // remove inherited functions
+      const componentTypeFunctions: Record<string, FunctionResponse> = componentTypeDefinition['functions'];
+      if (componentTypeFunctions != undefined) {
+        const filtered_functions = Object.entries(componentTypeFunctions).reduce((acc, [key, value]) => {
+          if (!value['isInherited']) {
+            acc[key] = value;
+          }
+          return acc;
+        }, {} as { [key: string]: object });
+        componentTypeDefinition['functions'] = filtered_functions;
       }
       // create component type if not exists
       try {

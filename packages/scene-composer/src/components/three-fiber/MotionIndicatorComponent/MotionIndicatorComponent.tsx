@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Color } from 'three';
 
 import { ISceneNodeInternal, IMotionIndicatorComponentInternal, useStore, useViewOptionState } from '../../../store';
@@ -7,7 +7,7 @@ import { getComponentGroupName } from '../../../utils/objectThreeUtils';
 import { Component } from '../../../models/SceneModels';
 import { dataBindingValuesProvider, ruleEvaluator } from '../../../utils/dataBindingUtils';
 import { getSceneResourceInfo, parseColorWithAlpha } from '../../../utils/sceneResourceUtils';
-import { SceneResourceType } from '../../../interfaces';
+import { KnownComponentType, SceneResourceType } from '../../../interfaces';
 
 import { LinearPlaneMotionIndicator } from './LinearPlaneMotionIndicator';
 import { LinearCylinderMotionIndicator } from './LinearCylinderMotionIndicator';
@@ -18,11 +18,14 @@ interface IMotionIndicatorComponentProps {
   component: IMotionIndicatorComponentInternal;
 }
 
-const MotionIndicatorComponentView: React.FC<IMotionIndicatorComponentProps> = ({
+const MotionIndicatorComponent: React.FC<IMotionIndicatorComponentProps> = ({
   node,
   component,
 }: IMotionIndicatorComponentProps) => {
   const sceneComposerId = useSceneComposerId();
+  const motionIndicatorVisible =
+    useViewOptionState(sceneComposerId).componentVisibilities[KnownComponentType.MotionIndicator];
+
   const dataInput = useStore(sceneComposerId)((state) => state.dataInput);
   const dataBindingTemplate = useStore(sceneComposerId)((state) => state.dataBindingTemplate);
   const speedRule = useStore(sceneComposerId)((state) =>
@@ -123,7 +126,7 @@ const MotionIndicatorComponentView: React.FC<IMotionIndicatorComponentProps> = (
   ]);
 
   return (
-    <group name={getComponentGroupName(node.ref, 'MOTION_INDICATOR')}>
+    <group name={getComponentGroupName(node.ref, 'MOTION_INDICATOR')} visible={motionIndicatorVisible}>
       {component.shape === 'LinearPlane' && (
         <LinearPlaneMotionIndicator
           speed={speed}
@@ -153,17 +156,6 @@ const MotionIndicatorComponentView: React.FC<IMotionIndicatorComponentProps> = (
       )}
     </group>
   );
-};
-
-const MotionIndicatorComponent = ({ component, node }: IMotionIndicatorComponentProps) => {
-  const sceneComposerId = useSceneComposerId();
-  const { motionIndicatorVisible } = useViewOptionState(sceneComposerId);
-
-  if (motionIndicatorVisible) {
-    return <MotionIndicatorComponentView component={component} node={node} />;
-  }
-
-  return <Fragment key={component.ref}></Fragment>;
 };
 
 export default MotionIndicatorComponent;

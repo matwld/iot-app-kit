@@ -326,7 +326,7 @@ test('basic functional test', async () => {
   console.log(`Nuking workspace: ${constants.workspaceId}`);
   argv2 = {
     _: ['nuke'],
-    $0: 'tmdt_local',
+    $0: 'tmdk_local',
     region: 'us-east-1',
     'workspace-id': constants.workspaceId,
   } as Arguments<nuke.Options>;

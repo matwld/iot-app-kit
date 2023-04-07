@@ -13,6 +13,7 @@ import {
   ListScenesCommandOutput,
   PropertyLatestValue,
   PropertyValueHistory,
+  GetComponentTypeCommandOutput,
 } from '@aws-sdk/client-iottwinmaker';
 import { EntityDefinitionForSync, verifyWorkspaceExists } from '../lib/utils';
 
@@ -30,6 +31,11 @@ export type tmdt_config_file = {
   models: string[];
   entities: string;
 };
+
+export type modifiedComponentTypeDefinition = Pick<
+  GetComponentTypeCommandOutput,
+  'componentTypeId' | 'description' | 'extendsFrom' | 'functions' | 'isSingleton' | 'propertyDefinitions'
+>;
 
 export const command = 'init';
 export const desc = 'Initializes a tmdt application';
@@ -80,14 +86,13 @@ async function import_component_types(workspaceIdStr: string, tmdt_config: tmdt_
             componentTypeId: componentTypeSummary.componentTypeId,
           });
 
-          const componentDefinition = {
+          const componentDefinition: modifiedComponentTypeDefinition = {
             componentTypeId: getComponentResp['componentTypeId'],
             description: getComponentResp['description'],
             extendsFrom: getComponentResp['extendsFrom'],
             functions: getComponentResp['functions'], // FIXME remove inherited values
             isSingleton: getComponentResp['isSingleton'],
             propertyDefinitions: getComponentResp['propertyDefinitions'],
-            // 'tags': compResp['tags'] // FIXME type issue with tags?
           };
 
           // save to file
@@ -163,7 +168,7 @@ async function import_scenes_and_models(workspaceIdStr: string, tmdt_config: tmd
                   if (objlist['Contents'] != undefined) {
                     const contents = objlist['Contents'];
                     for (const [, value] of Object.entries(contents)) {
-                      if ('Key' in value) {
+                      if ('Key' in value && value['Size'] && value['Size'] > 0) {
                         // TODO consider path.join in all s3 URI for better cross platform support?
                         modelFiles.add(`s3://${s3bucket}/${value['Key']}`);
                       }
@@ -210,9 +215,9 @@ async function import_scenes_and_models(workspaceIdStr: string, tmdt_config: tmd
           for (let index = 0; index < splitKey.length; index++) {
             // TODO make file system insensitive
             const subpath = `${splitKey.slice(0, index + 1).join('/')}`;
-            if (!fs.existsSync(path.join(outDir, subpath))) {
+            if (!fs.existsSync(path.join(dir_path, subpath))) {
               console.log(`making path: ${dir_path}/${subpath} ...`);
-              fs.mkdirSync(path.join(outDir, subpath));
+              fs.mkdirSync(path.join(dir_path, subpath));
             }
           }
         }
@@ -295,7 +300,6 @@ async function import_entities(workspaceId: string, tmdt_config: tmdt_config_fil
         const componentsDetails = entityDetails['components'];
         let filteredComponentDetails;
         if (componentsDetails != undefined) {
-          // TODO reduce amount of component detail captured if not snapshotting data?
           filteredComponentDetails = Object.entries(componentsDetails).reduce(
             (acc, [componentName, componentDetail]) => {
               const propertiesDetails = componentDetail['properties'] as object;

@@ -2,13 +2,13 @@ import React, { useContext, useMemo } from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 
 import { DeleteSvg, RotateIconSvg, ScaleIconSvg, TranslateIconSvg } from '../../../../assets/svgs';
-import { COMPOSER_FEATURES, KnownComponentType, TransformControlMode } from '../../../../interfaces';
+import { KnownComponentType, TransformControlMode } from '../../../../interfaces';
 import { sceneComposerIdContext } from '../../../../common/sceneComposerIdContext';
 import { useEditorState, useSceneDocument } from '../../../../store';
 import { ToolbarItem } from '../../common/ToolbarItem';
 import { ToolbarItemGroup } from '../../common/styledComponents';
 import { ToolbarItemOptions } from '../../common/types';
-import { getGlobalSettings } from '../../../../common/GlobalSettings';
+import { findComponentByType } from '../../../../utils/nodeUtils';
 
 enum TransformTypes {
   Translate = 'transform-translate',
@@ -34,28 +34,31 @@ export function ObjectItemGroup() {
   const { selectedSceneNodeRef, transformControlMode, setTransformControlMode } = useEditorState(sceneComposerId);
   const { getSceneNodeByRef, removeSceneNode } = useSceneDocument(sceneComposerId);
   const { formatMessage } = useIntl();
+  const selectedSceneNode = getSceneNodeByRef(selectedSceneNodeRef);
 
-  const isTagComponent = useMemo(() => {
-    const selectedSceneNode = getSceneNodeByRef(selectedSceneNodeRef);
-    return selectedSceneNode?.components.some((component) => component.type === KnownComponentType.Tag) === true;
-  }, [selectedSceneNodeRef]);
+  const isTagComponent = !!findComponentByType(selectedSceneNode, KnownComponentType.Tag);
+  const isOverlayComponent = !!findComponentByType(selectedSceneNode, KnownComponentType.DataOverlay);
 
   const transformSelectorItems = [
     {
       icon: { scale: 1.06, svg: TranslateIconSvg },
       uuid: TransformTypes.Translate,
       mode: 'translate',
+      isSelected: transformControlMode === 'translate',
     },
     {
       icon: { scale: 1.06, svg: RotateIconSvg },
       uuid: TransformTypes.Rotate,
       mode: 'rotate',
+      isDisabled: isTagComponent || isOverlayComponent,
+      isSelected: transformControlMode === 'rotate',
     },
     {
       icon: { scale: 1.06, svg: ScaleIconSvg },
       uuid: TransformTypes.Scale,
       mode: 'scale',
-      isDisabled: isTagComponent,
+      isDisabled: isTagComponent || isOverlayComponent,
+      isSelected: transformControlMode === 'scale',
     },
   ].map(
     (item) =>
@@ -68,24 +71,26 @@ export function ObjectItemGroup() {
 
   const initialSelectedItem = useMemo(() => {
     return transformSelectorItems.find((item) => item.mode === transformControlMode) ?? transformSelectorItems[0];
-  }, [transformSelectorItems, transformControlMode, isTagComponent]);
+  }, [transformSelectorItems, transformControlMode, isTagComponent, isOverlayComponent]);
 
   const isDeleteDisabled = selectedSceneNodeRef === undefined;
 
   const translatedItems = useMemo(() => {
     return transformSelectorItems;
-  }, [intl, isTagComponent]);
+  }, [intl, isTagComponent, isOverlayComponent, transformControlMode]);
 
   return (
     <ToolbarItemGroup>
       <ToolbarItem
-        items={{
-          label: intl.formatMessage({ defaultMessage: 'Delete', description: 'Toolbar label' }),
-          icon: { svg: DeleteSvg },
-          uuid: 'delete',
-        }}
+        items={[
+          {
+            label: intl.formatMessage({ defaultMessage: 'Delete', description: 'Toolbar label' }),
+            icon: { svg: DeleteSvg },
+            uuid: 'delete',
+            isDisabled: isDeleteDisabled,
+          },
+        ]}
         type='button'
-        isDisabled={isDeleteDisabled}
         onClick={() => {
           if (removeSceneNode && selectedSceneNodeRef) {
             removeSceneNode(selectedSceneNodeRef);
